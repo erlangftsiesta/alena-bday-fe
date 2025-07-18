@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface Song {
@@ -94,10 +95,18 @@ export function useMusicSearch() {
         // Stop previous song and play new one
         if (audioRef.current) {
           audioRef.current.pause();
+          audioRef.current = null;
         }
 
-        audioRef.current = new Audio(song.previewUrl);
-        audioRef.current.play();
+        const audio = new Audio(song.previewUrl);
+        audio.crossOrigin = "anonymous";
+        audioRef.current = audio;
+
+        // Reset progress for all other songs
+        setProgress({});
+        setTimeRemaining({});
+
+        audio.play().catch((err) => console.error("Error playing audio:", err));
         setCurrentlyPlaying(song.id);
 
         // Update progress
@@ -124,7 +133,7 @@ export function useMusicSearch() {
         }, 100);
 
         // Handle song end
-        audioRef.current.addEventListener("ended", () => {
+        audio.addEventListener("ended", () => {
           setCurrentlyPlaying(null);
           if (progressInterval.current) {
             clearInterval(progressInterval.current);
@@ -146,28 +155,30 @@ export function useMusicSearch() {
   );
 
   const sendMessage = useCallback(async (messageData: MessageData) => {
+    if (!messageData.song || !messageData.message.trim()) {
+      setError("Please select a song and write a message.");
+      return false;
+    }
+
     try {
-      // Mock API call - replace with your actual backend endpoint
-      const response = await fetch("http://localhost:3000/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(messageData),
+      await axios.post("http://localhost:3000/messages/new-message", {
+        songTitle: messageData.song.title,
+        artist: messageData.song.artist,
+        albumCover: messageData.song.image,
+        songMp3: messageData.song.previewUrl,
+        message: messageData.message,
+        sender: messageData.sender || "Anonymous",
+        date: new Date().toISOString(),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-
-      // Reset form
       setSelectedSong(null);
       setMessage("");
       setSender("");
 
       return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to send message");
       return false;
     }
   }, []);

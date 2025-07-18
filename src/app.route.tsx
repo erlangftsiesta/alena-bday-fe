@@ -15,8 +15,8 @@ export default function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/homepage" element={<Homepage />} />
-        <Route path="/public-message" element={<PublicMessagesPage />} />
-        <Route path="/private-message" element={<PrivateMessagesPage />} />
+        <Route path="/public-messages" element={<PublicMessagesPage />} />
+        <Route path="/private-messages" element={<PrivateMessagesPage />} />
 
         {/* 404 Fallback */}
         {/* <Route path="*" element={<NotFoundPage />} /> */}

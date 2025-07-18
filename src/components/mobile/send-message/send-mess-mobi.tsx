@@ -7,7 +7,7 @@ import { Search, Play, Pause, Music, Send, Heart } from "lucide-react"
 import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic"
 
 export default function SendMessageMobile() {
-  const [searchQuery, setSearchQuery] = useState("beautiful in white")
+  const [searchQuery, setSearchQuery] = useState("")
   const [showMessageForm, setShowMessageForm] = useState(false)
 
   const {
@@ -105,63 +105,72 @@ export default function SendMessageMobile() {
 
           {/* Song Results */}
           <div className="space-y-4">
-            {songs.map((song) => (
-              <div
-                key={song.id}
-                className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-4 shadow-lg border border-pink-200"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={song.image || "/placeholder.svg"}
-                    alt="Album cover"
-                    className="w-16 h-16 rounded-xl object-cover shadow-md"
-                  />
+            {songs.map((song) => {
+              const isPlaying = currentlyPlaying === song.id
+              return (
+                <div
+                  key={song.id}
+                  className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-4 shadow-lg border border-pink-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={song.image || "/placeholder.svg"}
+                      alt="Album cover"
+                      className="w-16 h-16 rounded-xl object-cover shadow-md"
+                    />
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-pink-800 text-lg truncate">{song.title}</h3>
-                    <p className="text-pink-600 text-sm truncate">{song.artist}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-pink-800 text-lg truncate">{song.title}</h3>
+                      <p className="text-pink-600 text-sm truncate">{song.artist}</p>
 
-                    {/* Progress Bar */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <div
-                        className="flex-1 bg-pink-200 h-1 rounded-full cursor-pointer"
-                        onClick={(e) => handleProgressClick(song, e)}
-                      >
+                      {/* Progress Bar */}
+                      <div className="flex items-center gap-2 mt-2">
                         <div
-                          className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                          style={{ width: `${progress[song.id] || 0}%` }}
-                        />
+                          className="flex-1 bg-pink-200 h-1 rounded-full cursor-pointer"
+                          onClick={(e) => handleProgressClick(song, e)}
+                        >
+                          <div
+                            className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                            style={{ width: `${progress[song.id] || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-pink-600 min-w-[40px]">{timeRemaining[song.id] || "-0:30"}</span>
                       </div>
-                      <span className="text-xs text-pink-600 min-w-[40px]">{timeRemaining[song.id] || "-0:30"}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {song.previewUrl ? (
+                        <button
+                          onClick={() => togglePlay(song)}
+                          className={`bg-white text-pink-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 ${
+                            isPlaying ? "ring-2 ring-pink-400" : ""
+                          }`}
+                        >
+                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                        </button>
+                      ) : (
+                        <div className="text-pink-400 text-xs">No preview</div>
+                      )}
+
+                      <button
+                        onClick={() => handleSongSelect(song)}
+                        className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        Select
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    {song.previewUrl ? (
-                      <button
-                        onClick={() => togglePlay(song)}
-                        className="bg-white text-pink-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        {currentlyPlaying === song.id ? (
-                          <Pause className="w-5 h-5" />
-                        ) : (
-                          <Play className="w-5 h-5 ml-0.5" />
-                        )}
-                      </button>
-                    ) : (
-                      <div className="text-pink-400 text-xs">No preview</div>
-                    )}
-
-                    <button
-                      onClick={() => handleSongSelect(song)}
-                      className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                    >
-                      Select
-                    </button>
-                  </div>
                 </div>
+              )
+            })}
+
+            {songs.length === 0 && !loading && (
+              <div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+                <Music className="w-16 h-16 text-pink-300 mx-auto mb-4" />
+                <p className="text-pink-600 text-lg font-medium">No songs found</p>
+                <p className="text-pink-500 text-sm">Try searching for another song</p>
               </div>
-            ))}
+            )}
           </div>
         </>
       ) : (

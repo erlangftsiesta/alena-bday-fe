@@ -3,11 +3,12 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Search, Play, Pause, Music, Send, Heart } from "lucide-react"
+import { Search, Play, Pause, Music, Send, Heart, ArrowLeft } from 'lucide-react'
 import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic"
 
 export default function SendMessageDesktop() {
-  const [searchQuery, setSearchQuery] = useState("beautiful in white")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showSearchResults, setShowSearchResults] = useState(true)
 
   const {
     songs,
@@ -30,6 +31,16 @@ export default function SendMessageDesktop() {
 
   const handleSearch = () => {
     searchSongs(searchQuery)
+    setShowSearchResults(true)
+  }
+
+  const handleSongSelect = (song: Song) => {
+    setSelectedSong(song)
+    setShowSearchResults(false) // Hide search results after selecting a song
+  }
+
+  const handleBackToSearch = () => {
+    setShowSearchResults(true)
   }
 
   const handleSendMessage = async () => {
@@ -98,134 +109,229 @@ export default function SendMessageDesktop() {
               <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl mb-6">{error}</div>
             )}
 
-            {/* Song Results */}
-            <div className="space-y-4">
-              {songs.map((song) => (
-                <div
-                  key={song.id}
-                  className={`bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6 shadow-lg border-2 transition-all duration-200 hover:shadow-xl ${
-                    selectedSong?.id === song.id ? "border-pink-400 ring-2 ring-pink-200" : "border-pink-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={song.image || "/placeholder.svg"}
-                      alt="Album cover"
-                      className="w-20 h-20 rounded-xl object-cover shadow-md"
-                    />
+            {/* Song Results - Only show if showSearchResults is true */}
+            {showSearchResults ? (
+              <div className="space-y-4">
+                {songs.map((song) => {
+                  const isPlaying = currentlyPlaying === song.id
+                  return (
+                    <div
+                      key={song.id}
+                      className={`bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6 shadow-lg border-2 transition-all duration-200 hover:shadow-xl ${
+                        selectedSong?.id === song.id ? "border-pink-400 ring-2 ring-pink-200" : "border-pink-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={song.image || "/placeholder.svg"}
+                          alt="Album cover"
+                          className="w-20 h-20 rounded-xl object-cover shadow-md"
+                        />
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-pink-800 text-xl mb-1">{song.title}</h3>
-                      <p className="text-pink-600 mb-3">{song.artist}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-pink-800 text-xl mb-1">{song.title}</h3>
+                          <p className="text-pink-600 mb-3">{song.artist}</p>
 
-                      {/* Progress Bar */}
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex-1 bg-pink-200 h-2 rounded-full cursor-pointer"
-                          onClick={(e) => handleProgressClick(song, e)}
-                        >
-                          <div
-                            className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                            style={{ width: `${progress[song.id] || 0}%` }}
-                          />
+                          {/* Progress Bar */}
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="flex-1 bg-pink-200 h-2 rounded-full cursor-pointer"
+                              onClick={(e) => handleProgressClick(song, e)}
+                            >
+                              <div
+                                className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                                style={{ width: `${progress[song.id] || 0}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-pink-600 min-w-[50px]">
+                              {timeRemaining[song.id] || "-0:30"}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-sm text-pink-600 min-w-[50px]">{timeRemaining[song.id] || "-0:30"}</span>
+
+                        <div className="flex items-center gap-3">
+                          {song.previewUrl ? (
+                            <button
+                              onClick={() => togglePlay(song)}
+                              className={`bg-white text-pink-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 ${
+                                isPlaying ? "ring-2 ring-pink-400" : ""
+                              }`}
+                            >
+                              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
+                            </button>
+                          ) : (
+                            <div className="text-pink-400 text-sm">No preview</div>
+                          )}
+
+                          <button
+                            onClick={() => handleSongSelect(song)}
+                            className={`px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${
+                              selectedSong?.id === song.id
+                                ? "bg-pink-500 text-white"
+                                : "bg-gradient-to-r from-pink-400 to-pink-500 text-white"
+                            }`}
+                          >
+                            {selectedSong?.id === song.id ? "Selected" : "Select"}
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  )
+                })}
 
-                    <div className="flex items-center gap-3">
-                      {song.previewUrl ? (
+                {songs.length === 0 && !loading && (
+                  <div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+                    <Music className="w-16 h-16 text-pink-300 mx-auto mb-4" />
+                    <p className="text-pink-600 text-lg font-medium">No songs found</p>
+                    <p className="text-pink-500 text-sm">Try searching for another song</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Message Form for Desktop - Show when a song is selected and search results are hidden */
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <button
+                  onClick={handleBackToSearch}
+                  className="text-pink-500 mb-6 flex items-center gap-2 hover:text-pink-700 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to search results
+                </button>
+
+                {/* Selected Song Display - Larger version */}
+                {selectedSong && (
+                  <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-6 mb-8">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={selectedSong.image || "/placeholder.svg"}
+                        alt="Album cover"
+                        className="w-24 h-24 rounded-xl object-cover shadow-lg"
+                      />
+                      <div>
+                        <h3 className="font-bold text-pink-800 text-2xl mb-1">{selectedSong.title}</h3>
+                        <p className="text-pink-600 text-lg">{selectedSong.artist}</p>
+                        
+                        {/* Play button */}
                         <button
-                          onClick={() => togglePlay(song)}
-                          className="bg-white text-pink-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200"
+                          onClick={() => togglePlay(selectedSong)}
+                          className={`mt-3 bg-white text-pink-500 px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 ${
+                            currentlyPlaying === selectedSong.id ? "ring-2 ring-pink-400" : ""
+                          }`}
                         >
-                          {currentlyPlaying === song.id ? (
-                            <Pause className="w-6 h-6" />
+                          {currentlyPlaying === selectedSong.id ? (
+                            <>
+                              <Pause className="w-4 h-4" /> Pause Preview
+                            </>
                           ) : (
-                            <Play className="w-6 h-6 ml-0.5" />
+                            <>
+                              <Play className="w-4 h-4" /> Play Preview
+                            </>
                           )}
                         </button>
-                      ) : (
-                        <div className="text-pink-400 text-sm">No preview</div>
-                      )}
-
-                      <button
-                        onClick={() => setSelectedSong(song)}
-                        className={`px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${
-                          selectedSong?.id === song.id
-                            ? "bg-pink-500 text-white"
-                            : "bg-gradient-to-r from-pink-400 to-pink-500 text-white"
-                        }`}
-                      >
-                        {selectedSong?.id === song.id ? "Selected" : "Select"}
-                      </button>
+                      </div>
                     </div>
                   </div>
+                )}
+
+                {/* Message Input */}
+                <div className="mb-6">
+                  <label className="block text-pink-800 font-medium mb-3 text-lg">Your Message</label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write your heartfelt message here..."
+                    className="w-full p-5 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800 resize-none text-lg"
+                    rows={6}
+                  />
                 </div>
-              ))}
-            </div>
+
+                {/* Sender Input */}
+                <div className="mb-8">
+                  <label className="block text-pink-800 font-medium mb-3 text-lg">From (optional)</label>
+                  <input
+                    type="text"
+                    value={sender}
+                    onChange={(e) => setSender(e.target.value)}
+                    placeholder="Anonymous"
+                    className="w-full p-5 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800 text-lg"
+                  />
+                </div>
+
+                {/* Send Button */}
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!selectedSong || !message.trim()}
+                  className="w-full bg-gradient-to-r from-pink-400 to-pink-500 text-white py-5 rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  <Send className="w-6 h-6" />
+                  Send with Love
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Right Column - Message Form */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
-              <h2 className="text-2xl font-bold text-pink-800 mb-6 flex items-center gap-2">
-                <Music className="w-6 h-6" />
-                Your Message
-              </h2>
+          {/* Right Column - Message Form (only visible when search results are shown) */}
+          {showSearchResults && (
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
+                <h2 className="text-2xl font-bold text-pink-800 mb-6 flex items-center gap-2">
+                  <Music className="w-6 h-6" />
+                  Your Message
+                </h2>
 
-              {/* Selected Song Display */}
-              {selectedSong && (
-                <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-4 mb-6">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={selectedSong.image || "/placeholder.svg"}
-                      alt="Album cover"
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-pink-800 text-sm truncate">{selectedSong.title}</h3>
-                      <p className="text-pink-600 text-xs truncate">{selectedSong.artist}</p>
+                {/* Selected Song Display */}
+                {selectedSong && (
+                  <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={selectedSong.image || "/placeholder.svg"}
+                        alt="Album cover"
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-pink-800 text-sm truncate">{selectedSong.title}</h3>
+                        <p className="text-pink-600 text-xs truncate">{selectedSong.artist}</p>
+                      </div>
                     </div>
                   </div>
+                )}
+
+                {/* Message Input */}
+                <div className="mb-4">
+                  <label className="block text-pink-800 font-medium mb-2">Your Message</label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write your heartfelt message here..."
+                    className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800 resize-none"
+                    rows={6}
+                  />
                 </div>
-              )}
 
-              {/* Message Input */}
-              <div className="mb-4">
-                <label className="block text-pink-800 font-medium mb-2">Your Message</label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your heartfelt message here..."
-                  className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800 resize-none"
-                  rows={6}
-                />
+                {/* Sender Input */}
+                <div className="mb-6">
+                  <label className="block text-pink-800 font-medium mb-2">From (optional)</label>
+                  <input
+                    type="text"
+                    value={sender}
+                    onChange={(e) => setSender(e.target.value)}
+                    placeholder="Anonymous"
+                    className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800"
+                  />
+                </div>
+
+                {/* Send Button */}
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!selectedSong || !message.trim()}
+                  className="w-full bg-gradient-to-r from-pink-400 to-pink-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <Send className="w-5 h-5" />
+                  Send with Love
+                </button>
               </div>
-
-              {/* Sender Input */}
-              <div className="mb-6">
-                <label className="block text-pink-800 font-medium mb-2">From (optional)</label>
-                <input
-                  type="text"
-                  value={sender}
-                  onChange={(e) => setSender(e.target.value)}
-                  placeholder="Anonymous"
-                  className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800"
-                />
-              </div>
-
-              {/* Send Button */}
-              <button
-                onClick={handleSendMessage}
-                disabled={!selectedSong || !message.trim()}
-                className="w-full bg-gradient-to-r from-pink-400 to-pink-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                <Send className="w-5 h-5" />
-                Send with Love
-              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

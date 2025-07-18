@@ -212,7 +212,7 @@ export default function LoginDesktop() {
 
       {/* Footer */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-        <p className="text-pink-500 text-sm">Made with 💕 for spreading love through music</p>
+        <p className="text-pink-500 text-sm">Made with 💕 from your favourite boy</p>
       </div>
     </div>
   )
