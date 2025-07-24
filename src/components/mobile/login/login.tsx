@@ -8,7 +8,7 @@ export default function LoginMobile() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const { loading, error, login, loginWithGoogle, clearError } = useAuth()
+  const { loading, error, login, clearError } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,12 +19,12 @@ export default function LoginMobile() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    const success = await loginWithGoogle()
-    if (success) {
-      console.log("Google login successful! ✨")
-    }
-  }
+  // const handleGoogleLogin = async () => {
+  //   const success = await loginWithGoogle()
+  //   if (success) {
+  //     console.log("Google login successful! ✨")
+  //   }
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 p-4 relative overflow-hidden">
@@ -52,7 +52,7 @@ export default function LoginMobile() {
             </h1>
             <Heart className="w-8 h-8 text-pink-500 animate-pulse" />
           </div>
-          <p className="text-pink-600 text-lg font-medium">Ready to spread love through music? 💕</p>
+          <p className="text-pink-600 text-lg font-medium">Happy Birthday my sweetie girl 💕</p>
           <p className="text-pink-500 text-sm mt-2">Sign in to your beautiful account ✨</p>
         </div>
 
@@ -107,14 +107,14 @@ export default function LoginMobile() {
             </div>
 
             {/* Forgot Password */}
-            <div className="text-right">
+            {/* <div className="text-right">
               <button
                 type="button"
                 className="text-pink-500 hover:text-pink-700 font-medium text-sm underline transition-colors"
               >
                 Forgot your password? 🥺
               </button>
-            </div>
+            </div> */}
 
             {/* Login Button */}
             <button
@@ -137,14 +137,11 @@ export default function LoginMobile() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center my-8">
+          {/* <div className="flex items-center my-8">
             <div className="flex-1 border-t border-pink-200"></div>
             <span className="px-4 text-pink-500 font-medium">or continue with</span>
             <div className="flex-1 border-t border-pink-200"></div>
           </div>
-
-          {/* Google Login */}
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
@@ -156,7 +153,6 @@ export default function LoginMobile() {
             Continue with Google ✨
           </button>
 
-          {/* Sign Up Link */}
           <div className="text-center mt-8">
             <p className="text-pink-600">
               New here sweetie?{" "}
@@ -164,7 +160,7 @@ export default function LoginMobile() {
                 Create your beautiful account 🌸
               </button>
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* Footer */}

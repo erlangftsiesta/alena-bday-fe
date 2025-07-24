@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export interface Message {
   id: string;
@@ -9,15 +9,24 @@ export interface Message {
   artist: string;
   albumCover: string;
   message: string;
+  songMp3?: string;
   sender: string;
   date: string;
   isPublic: boolean;
+  isNew: boolean; // New field for unread messages
+}
+
+export interface AudioState {
+  currentlyPlaying: string | null;
+  progress: { [key: string]: number };
+  timeRemaining: { [key: string]: string };
 }
 
 export interface NotificationData {
   totalMessages: number;
   unreadMessages: number;
   lastMessageDate: string;
+  newMessages: number; // New field for new messages
 }
 
 export function useHomepage() {
@@ -26,11 +35,21 @@ export function useHomepage() {
     totalMessages: 0,
     unreadMessages: 0,
     lastMessageDate: "",
+    newMessages: 0, // Initialize new messages count
   });
   const [isGiftOpened, setIsGiftOpened] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ [key: string]: number }>({});
+  const [timeRemaining, setTimeRemaining] = useState<{ [key: string]: string }>(
+    {}
+  );
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const progressInterval = useRef<number | null>(null);
 
   // Mock data
   // const mockMessages: Message[] = [
@@ -89,11 +108,15 @@ export function useHomepage() {
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
+      const newMessagesCount = data.filter((m) => m.isNew).length;
+      const privateMessagesCount = data.filter((m) => !m.isPublic).length;
+
       setMessages(sorted);
       setNotification({
         totalMessages: data.length,
         unreadMessages: data.filter((m: any) => !m.isPublic).length,
         lastMessageDate: sorted[0]?.date || "",
+        newMessages: newMessagesCount,
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to load messages");
@@ -136,12 +159,20 @@ export function useHomepage() {
             msg.id === messageId ? { ...msg, isPublic: makePublic } : msg
           );
 
-          // Langsung hitung unreadMessages dari updated array
-          const unread = updated.filter((m) => !m.isPublic).length;
+          const updatedMessages = messages.map((msg) =>
+            msg.id === messageId ? { ...msg, isPublic: makePublic } : msg
+          );
+          const privateMessagesCount = updatedMessages.filter(
+            (m) => !m.isPublic
+          ).length;
+          const newMessagesCount = updatedMessages.filter(
+            (m) => m.isNew
+          ).length;
 
           setNotification((prev) => ({
             ...prev,
-            unreadMessages: unread,
+            unreadMessages: privateMessagesCount,
+            newMessages: newMessagesCount,
           }));
 
           return updated;
@@ -158,8 +189,130 @@ export function useHomepage() {
     []
   );
 
+  const togglePlay = useCallback(
+    (message: Message) => {
+      // Mock mp3 URL for demo - replace with actual song URLs
+      const mp3Url = message?.songMp3;
+
+      if (currentlyPlaying === message.id) {
+        // Pause current song
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        setCurrentlyPlaying(null);
+        if (progressInterval.current) {
+          clearInterval(progressInterval.current);
+        }
+      } else {
+        // Stop previous song and play new one
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+
+        const audio = new Audio(mp3Url);
+        audio.crossOrigin = "anonymous";
+        audioRef.current = audio;
+
+        // Reset progress for all other songs
+        setProgress({});
+        setTimeRemaining({});
+
+        audio.play().catch((err) => console.error("Error playing audio:", err));
+        setCurrentlyPlaying(message.id);
+
+        // Update progress
+        if (progressInterval.current) {
+          clearInterval(progressInterval.current);
+        }
+
+        progressInterval.current = setInterval(() => {
+          if (audioRef.current) {
+            const current = audioRef.current.currentTime;
+            const duration = audioRef.current.duration || 30;
+            const progressPercent = (current / duration) * 100;
+
+            setProgress((prev) => ({ ...prev, [message.id]: progressPercent }));
+
+            const remaining = duration - current;
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+            setTimeRemaining((prev) => ({
+              ...prev,
+              [message.id]: `-${minutes}:${seconds
+                .toString()
+                .padStart(2, "0")}`,
+            }));
+          }
+        }, 100);
+
+        // Handle song end
+        audio.addEventListener("ended", () => {
+          setCurrentlyPlaying(null);
+          if (progressInterval.current) {
+            clearInterval(progressInterval.current);
+          }
+        });
+      }
+    },
+    [currentlyPlaying]
+  );
+
+  const markMessageAsRead = useCallback(async (messageId: string) => {
+    try {
+      // Mock API call to mark as read
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId && msg.isNew ? { ...msg, isNew: false } : msg
+        )
+      );
+
+      // Update notification count
+      setNotification((prev) => ({
+        ...prev,
+        newMessages: Math.max(0, prev.newMessages - 1),
+      }));
+
+      return true;
+    } catch (err) {
+      console.error("Failed to mark message as read:", err);
+      return false;
+    }
+  }, []);
+
+  // Mark all messages as read
+  const markAllAsRead = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Mock API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setMessages((prev) => prev.map((msg) => ({ ...msg, isNew: false })));
+      setNotification((prev) => ({ ...prev, newMessages: 0 }));
+
+      return true;
+    } catch (err) {
+      setError("Failed to mark all messages as read");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadMessages();
+
+    // Cleanup function
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+      }
+    };
   }, [loadMessages]);
 
   return {
@@ -169,10 +322,16 @@ export function useHomepage() {
     showModal,
     loading,
     error,
+    currentlyPlaying,
+    progress,
+    timeRemaining,
     openGift,
     closeModal,
     refreshMessages,
     toggleMessagePrivacy,
     loadMessages,
+    togglePlay,
+    markMessageAsRead,
+    markAllAsRead,
   };
 }

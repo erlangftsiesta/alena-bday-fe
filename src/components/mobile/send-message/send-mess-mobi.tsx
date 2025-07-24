@@ -7,7 +7,7 @@ import { Search, Play, Pause, Music, Send, Heart } from "lucide-react"
 import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic"
 
 export default function SendMessageMobile() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("beautiful in white")
   const [showMessageForm, setShowMessageForm] = useState(false)
 
   const {
@@ -110,9 +110,21 @@ export default function SendMessageMobile() {
               return (
                 <div
                   key={song.id}
-                  className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-4 shadow-lg border border-pink-200"
+                  className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-4 shadow-lg border border-pink-200 relative"
                 >
-                  <div className="flex items-center gap-3">
+                  {/* Play Button - Top Right Corner */}
+                  {song.previewUrl && (
+                    <button
+                      onClick={() => togglePlay(song)}
+                      className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                        isPlaying ? "bg-pink-500 text-white" : "bg-white text-pink-500 hover:bg-pink-50"
+                      }`}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                    </button>
+                  )}
+
+                  <div className="flex items-center gap-3 pr-12">
                     <img
                       src={song.image || "/placeholder.svg"}
                       alt="Album cover"
@@ -121,44 +133,38 @@ export default function SendMessageMobile() {
 
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-pink-800 text-lg truncate">{song.title}</h3>
-                      <p className="text-pink-600 text-sm truncate">{song.artist}</p>
+                      <p className="text-pink-600 text-sm truncate mb-2">{song.artist}</p>
 
-                      {/* Progress Bar */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <div
-                          className="flex-1 bg-pink-200 h-1 rounded-full cursor-pointer"
-                          onClick={(e) => handleProgressClick(song, e)}
-                        >
+                      {/* Progress Bar - Only show when playing */}
+                      {isPlaying && (
+                        <div className="flex items-center gap-2 mb-2">
                           <div
-                            className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                            style={{ width: `${progress[song.id] || 0}%` }}
-                          />
+                            className="flex-1 bg-pink-200 h-1 rounded-full cursor-pointer"
+                            onClick={(e) => handleProgressClick(song, e)}
+                          >
+                            <div
+                              className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                              style={{ width: `${progress[song.id] || 0}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-pink-600 min-w-[40px]">
+                            {timeRemaining[song.id] || "-0:30"}
+                          </span>
                         </div>
-                        <span className="text-xs text-pink-600 min-w-[40px]">{timeRemaining[song.id] || "-0:30"}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {song.previewUrl ? (
-                        <button
-                          onClick={() => togglePlay(song)}
-                          className={`bg-white text-pink-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 ${
-                            isPlaying ? "ring-2 ring-pink-400" : ""
-                          }`}
-                        >
-                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                        </button>
-                      ) : (
-                        <div className="text-pink-400 text-xs">No preview</div>
                       )}
 
-                      <button
-                        onClick={() => handleSongSelect(song)}
-                        className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                      >
-                        Select
-                      </button>
+                      {!song.previewUrl && <div className="text-pink-400 text-xs">No preview available</div>}
                     </div>
+                  </div>
+
+                  {/* Select Button - Bottom Right */}
+                  <div className="flex justify-end mt-3">
+                    <button
+                      onClick={() => handleSongSelect(song)}
+                      className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                    >
+                      Select
+                    </button>
                   </div>
                 </div>
               )
@@ -185,18 +191,53 @@ export default function SendMessageMobile() {
 
           {/* Selected Song */}
           {selectedSong && (
-            <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-4 mb-6 relative">
+              {/* Play Button - Top Right Corner */}
+              {selectedSong.previewUrl && (
+                <button
+                  onClick={() => togglePlay(selectedSong)}
+                  className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                    currentlyPlaying === selectedSong.id
+                      ? "bg-pink-500 text-white"
+                      : "bg-white text-pink-500 hover:bg-pink-50"
+                  }`}
+                >
+                  {currentlyPlaying === selectedSong.id ? (
+                    <Pause className="w-3 h-3" />
+                  ) : (
+                    <Play className="w-3 h-3 ml-0.5" />
+                  )}
+                </button>
+              )}
+
+              <div className="flex items-center gap-3 pr-10">
                 <img
                   src={selectedSong.image || "/placeholder.svg"}
                   alt="Album cover"
                   className="w-12 h-12 rounded-lg object-cover"
                 />
-                <div>
+                <div className="flex-1">
                   <h3 className="font-bold text-pink-800">{selectedSong.title}</h3>
-                  <p className="text-pink-600 text-sm">{selectedSong.artist}</p>
+                  <p className="text-pink-600 text-sm mb-2">{selectedSong.artist}</p>
+
+                  {/* Progress Bar - Only show when playing */}
+                  {currentlyPlaying === selectedSong.id && (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="flex-1 bg-pink-200 h-1 rounded-full cursor-pointer"
+                        onClick={(e) => handleProgressClick(selectedSong, e)}
+                      >
+                        <div
+                          className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                          style={{ width: `${progress[selectedSong.id] || 0}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-pink-600 min-w-[35px]">
+                        {timeRemaining[selectedSong.id] || "-0:30"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <Music className="w-5 h-5 text-pink-500 ml-auto" />
               </div>
             </div>
           )}

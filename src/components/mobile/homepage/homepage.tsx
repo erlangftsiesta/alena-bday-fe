@@ -1,6 +1,19 @@
 "use client"
 
-import { Heart, Gift, Music, Sparkles, Lock, Globe, X, RefreshCw } from "lucide-react"
+import {
+  Heart,
+  Gift,
+  Music,
+  Sparkles,
+  Lock,
+  Globe,
+  X,
+  RefreshCw,
+  Play,
+  Pause,
+  Eye,
+  CheckIcon as EyeCheck,
+} from "lucide-react"
 import { useHomepage } from "../../../hooks/useHomepage"
 
 export default function HomepageMobile() {
@@ -11,11 +24,23 @@ export default function HomepageMobile() {
     showModal,
     loading,
     error,
+    currentlyPlaying,
+    progress,
+    timeRemaining,
     openGift,
     closeModal,
     refreshMessages,
     toggleMessagePrivacy,
+    togglePlay,
+    markMessageAsRead,
+    markAllAsRead,
   } = useHomepage()
+
+  const handleMessageClick = async (message: any) => {
+    if (message.isNew) {
+      await markMessageAsRead(message.id)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 p-4 relative overflow-hidden">
@@ -65,9 +90,16 @@ export default function HomepageMobile() {
         {/* Gift Box */}
         <div className="flex justify-center mb-8">
           <div className="relative">
-            {/* Notification Badge */}
+            {/* Notification Badge - Show new messages count */}
+            {notification.newMessages > 0 && !isGiftOpened && (
+              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg animate-bounce z-10">
+                {notification.newMessages}
+              </div>
+            )}
+
+            {/* Total messages badge */}
             {notification.totalMessages > 0 && !isGiftOpened && (
-              <div className="absolute -top-2 -right-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg animate-bounce z-10">
+              <div className="absolute -top-2 -left-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg z-10">
                 {notification.totalMessages}
               </div>
             )}
@@ -148,6 +180,11 @@ export default function HomepageMobile() {
               <p className="text-pink-700 font-semibold text-lg">
                 {notification.totalMessages} love messages waiting! 💌
               </p>
+              {notification.newMessages > 0 && (
+                <p className="text-red-600 font-bold text-sm animate-pulse">
+                  🔥 {notification.newMessages} NEW messages!
+                </p>
+              )}
               <p className="text-pink-600 text-sm">Tap the gift to open your musical surprises ✨</p>
             </div>
           ) : (
@@ -171,9 +208,29 @@ export default function HomepageMobile() {
               >
                 <X className="w-6 h-6" />
               </button>
+
+              {/* Mark All as Read Button */}
+              {notification.newMessages > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  disabled={loading}
+                  className="absolute top-4 left-4 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-medium hover:bg-white/30 transition-colors disabled:opacity-50 flex items-center gap-1"
+                >
+                  <EyeCheck className="w-3 h-3" />
+                  Mark All Read
+                </button>
+              )}
+
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-2">Your Love Messages 💕</h2>
-                <p className="text-pink-100">{messages.length} beautiful songs just for you!</p>
+                <p className="text-pink-100">
+                  {messages.length} beautiful songs just for you!
+                  {notification.newMessages > 0 && (
+                    <span className="block text-yellow-200 font-semibold mt-1">
+                      ✨ {notification.newMessages} new messages!
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -183,25 +240,83 @@ export default function HomepageMobile() {
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
-                    className="bg-gradient-to-r from-pink-50 to-orange-50 rounded-2xl p-4 border border-pink-200 animate-fade-in"
+                    onClick={() => handleMessageClick(message)}
+                    className={`bg-gradient-to-r rounded-2xl p-4 border-2 animate-fade-in relative cursor-pointer transition-all duration-200 ${
+                      message.isNew
+                        ? "from-red-50 to-pink-50 border-red-300 shadow-lg ring-2 ring-red-200"
+                        : "from-pink-50 to-orange-50 border-pink-200"
+                    }`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="flex items-start gap-3 mb-3">
+                    {/* New Message Indicator */}
+                    {message.isNew && (
+                      <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse">
+                        NEW
+                      </div>
+                    )}
+
+                    {/* Play Button - Top Right Corner */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        togglePlay(message)
+                      }}
+                      className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                        currentlyPlaying === message.id
+                          ? "bg-pink-500 text-white"
+                          : "bg-white text-pink-500 hover:bg-pink-50"
+                      }`}
+                    >
+                      {currentlyPlaying === message.id ? (
+                        <Pause className="w-4 h-4" />
+                      ) : (
+                        <Play className="w-4 h-4 ml-0.5" />
+                      )}
+                    </button>
+
+                    <div className="flex items-start gap-3 mb-3 pr-10">
                       <img
                         src={message.albumCover || "/placeholder.svg"}
                         alt="Album"
                         className="w-12 h-12 rounded-xl object-cover shadow-md"
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-pink-800 text-sm truncate">{message.songTitle}</h3>
-                        <p className="text-pink-600 text-xs mb-2">{message.artist}</p>
-                        <p className="text-pink-700 text-sm leading-relaxed">{message.message}</p>
+                        <h3
+                          className={`font-bold text-sm truncate ${message.isNew ? "text-red-800" : "text-pink-800"}`}
+                        >
+                          {message.songTitle}
+                        </h3>
+                        <p className={`text-xs mb-2 ${message.isNew ? "text-red-600" : "text-pink-600"}`}>
+                          {message.artist}
+                        </p>
+                        <p className={`text-sm leading-relaxed ${message.isNew ? "text-red-700" : "text-pink-700"}`}>
+                          {message.message}
+                        </p>
                       </div>
                     </div>
-                    {/* Compact Privacy Buttons - Moved here */}
+
+                    {/* Progress Bar - Only show when playing */}
+                    {currentlyPlaying === message.id && (
+                      <div className="flex items-center gap-2 mb-3 px-1">
+                        <div className="flex-1 bg-pink-200 h-1 rounded-full">
+                          <div
+                            className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                            style={{ width: `${progress[message.id] || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-pink-600 min-w-[35px]">
+                          {timeRemaining[message.id] || "-0:30"}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Compact Privacy Buttons */}
                     <div className="flex gap-2 mt-2">
                       <button
-                        onClick={() => toggleMessagePrivacy(message.id, false)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleMessagePrivacy(message.id, false)
+                        }}
                         disabled={loading || !message.isPublic}
                         className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
                           !message.isPublic
@@ -213,7 +328,10 @@ export default function HomepageMobile() {
                         Private
                       </button>
                       <button
-                        onClick={() => toggleMessagePrivacy(message.id, true)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleMessagePrivacy(message.id, true)
+                        }}
                         disabled={loading || message.isPublic}
                         className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
                           message.isPublic
@@ -226,14 +344,20 @@ export default function HomepageMobile() {
                       </button>
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-pink-500 text-xs font-medium">From: {message.sender}</span>
-                      <span className="text-pink-400 text-xs">{message.date}</span>
+                      <span className={`text-xs font-medium ${message.isNew ? "text-red-500" : "text-pink-500"}`}>
+                        From: {message.sender}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {message.isNew && <Eye className="w-3 h-3 text-red-400" />}
+                        <span className={`text-xs ${message.isNew ? "text-red-400" : "text-pink-400"}`}>
+                          {message.date}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            {/* Removed the redundant "Action Buttons - Per Message" section from the bottom */}
           </div>
         </div>
       )}

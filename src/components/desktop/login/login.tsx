@@ -3,30 +3,30 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Heart, Mail, Lock, Eye, EyeOff, Sparkles, Star, Music } from "lucide-react"
+import { Heart, Lock, Eye, EyeOff, Sparkles, Star, Music, User } from "lucide-react"
 import { useAuth } from "../../../hooks/useAuth"
 
 export default function LoginDesktop() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const { loading, error, login, loginWithGoogle, clearError } = useAuth()
+  const { loading, error, login, clearError } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = await login({ email, password })
+    const success = await login({ username, password })
     if (success) {
       // Redirect to home or dashboard
       console.log("Login successful! 💕")
     }
   }
 
-  const handleGoogleLogin = async () => {
-    const success = await loginWithGoogle()
-    if (success) {
-      console.log("Google login successful! ✨")
-    }
-  }
+  // const handleGoogleLogin = async () => {
+  //   const success = await loginWithGoogle()
+  //   if (success) {
+  //     console.log("Google login successful! ✨")
+  //   }
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 relative overflow-hidden">
@@ -62,7 +62,7 @@ export default function LoginDesktop() {
                 </h1>
                 <Heart className="w-12 h-12 text-pink-500 animate-pulse" />
               </div>
-              <p className="text-2xl text-pink-600 font-medium mb-4">Ready to spread love through music? 💕</p>
+              <p className="text-2xl text-pink-600 font-medium mb-4">Happy Birthday my sweetie girl 💕</p>
               <p className="text-lg text-pink-500">
                 Sign in to your beautiful account and continue your musical journey ✨
               </p>
@@ -73,19 +73,19 @@ export default function LoginDesktop() {
                 <div className="w-8 h-8 bg-pink-200 rounded-full flex items-center justify-center">
                   <Music className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-lg">Send heartfelt songs to your loved ones</span>
+                <span className="text-lg">Get happiness from the music they sent</span>
               </div>
               <div className="flex items-center gap-3 justify-center lg:justify-start">
                 <div className="w-8 h-8 bg-pink-200 rounded-full flex items-center justify-center">
                   <Heart className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-lg">Express your feelings through music</span>
+                <span className="text-lg">Fill your thoughts and ears with love</span>
               </div>
               <div className="flex items-center gap-3 justify-center lg:justify-start">
                 <div className="w-8 h-8 bg-pink-200 rounded-full flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-pink-600" />
                 </div>
-                <span className="text-lg">Create magical musical moments</span>
+                <span className="text-lg">All of this is only for you</span>
               </div>
             </div>
           </div>
@@ -111,14 +111,13 @@ export default function LoginDesktop() {
               <form onSubmit={handleLogin} className="space-y-6">
                 {/* Email Input */}
                 <div>
-                  <label className="block text-pink-800 font-semibold mb-3 text-lg">Email Address 💌</label>
+                  <label className="block text-pink-800 font-semibold mb-3 text-lg">Username 💌</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-400 w-6 h-6" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-400 w-6 h-6" />
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your.email@example.com"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className="w-full pl-14 pr-4 py-4 border-2 border-pink-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-pink-200 focus:border-pink-400 text-pink-800 placeholder-pink-400 text-lg transition-all duration-200"
                     />
                   </div>
@@ -147,14 +146,14 @@ export default function LoginDesktop() {
                 </div>
 
                 {/* Forgot Password */}
-                <div className="text-right">
+                {/* <div className="text-right">
                   <button
                     type="button"
                     className="text-pink-500 hover:text-pink-700 font-medium underline transition-colors"
                   >
                     Forgot your password? 🥺
                   </button>
-                </div>
+                </div> */}
 
                 {/* Login Button */}
                 <button
@@ -178,14 +177,14 @@ export default function LoginDesktop() {
               </form>
 
               {/* Divider */}
-              <div className="flex items-center my-8">
+              {/* <div className="flex items-center my-8">
                 <div className="flex-1 border-t border-pink-200"></div>
                 <span className="px-4 text-pink-500 font-medium">or continue with</span>
                 <div className="flex-1 border-t border-pink-200"></div>
-              </div>
+              </div> */}
 
               {/* Google Login */}
-              <button
+              {/* <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
                 className="w-full bg-white border-2 border-pink-200 text-pink-700 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl hover:bg-pink-50 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-3"
@@ -194,17 +193,17 @@ export default function LoginDesktop() {
                   <span className="text-white font-bold">G</span>
                 </div>
                 Continue with Google ✨
-              </button>
+              </button> */}
 
               {/* Sign Up Link */}
-              <div className="text-center mt-8">
+              {/* <div className="text-center mt-8">
                 <p className="text-pink-600 text-lg">
                   New here sweetie?{" "}
                   <button className="text-pink-500 hover:text-pink-700 font-semibold underline transition-colors">
                     Create your beautiful account 🌸
                   </button>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

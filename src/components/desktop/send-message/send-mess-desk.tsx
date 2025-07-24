@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Search, Play, Pause, Music, Send, Heart, ArrowLeft } from 'lucide-react'
+import { Search, Play, Pause, Music, Send, Heart, ArrowLeft } from "lucide-react"
 import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic"
 
 export default function SendMessageDesktop() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("beautiful in white")
   const [showSearchResults, setShowSearchResults] = useState(true)
 
   const {
@@ -109,7 +109,7 @@ export default function SendMessageDesktop() {
               <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl mb-6">{error}</div>
             )}
 
-            {/* Song Results - Only show if showSearchResults is true */}
+            {/* Song Results */}
             {showSearchResults ? (
               <div className="space-y-4">
                 {songs.map((song) => {
@@ -117,11 +117,23 @@ export default function SendMessageDesktop() {
                   return (
                     <div
                       key={song.id}
-                      className={`bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6 shadow-lg border-2 transition-all duration-200 hover:shadow-xl ${
+                      className={`bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6 shadow-lg border-2 transition-all duration-200 hover:shadow-xl relative ${
                         selectedSong?.id === song.id ? "border-pink-400 ring-2 ring-pink-200" : "border-pink-200"
                       }`}
                     >
-                      <div className="flex items-center gap-4">
+                      {/* Play Button - Top Right Corner */}
+                      {song.previewUrl && (
+                        <button
+                          onClick={() => togglePlay(song)}
+                          className={`absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                            isPlaying ? "bg-pink-500 text-white" : "bg-white text-pink-500 hover:bg-pink-50"
+                          }`}
+                        >
+                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                        </button>
+                      )}
+
+                      <div className="flex items-center gap-4 pr-16">
                         <img
                           src={song.image || "/placeholder.svg"}
                           alt="Album cover"
@@ -132,37 +144,28 @@ export default function SendMessageDesktop() {
                           <h3 className="font-bold text-pink-800 text-xl mb-1">{song.title}</h3>
                           <p className="text-pink-600 mb-3">{song.artist}</p>
 
-                          {/* Progress Bar */}
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="flex-1 bg-pink-200 h-2 rounded-full cursor-pointer"
-                              onClick={(e) => handleProgressClick(song, e)}
-                            >
+                          {/* Progress Bar - Only show when playing */}
+                          {isPlaying && (
+                            <div className="flex items-center gap-3 mb-2">
                               <div
-                                className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                                style={{ width: `${progress[song.id] || 0}%` }}
-                              />
+                                className="flex-1 bg-pink-200 h-2 rounded-full cursor-pointer"
+                                onClick={(e) => handleProgressClick(song, e)}
+                              >
+                                <div
+                                  className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                                  style={{ width: `${progress[song.id] || 0}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-pink-600 min-w-[50px]">
+                                {timeRemaining[song.id] || "-0:30"}
+                              </span>
                             </div>
-                            <span className="text-sm text-pink-600 min-w-[50px]">
-                              {timeRemaining[song.id] || "-0:30"}
-                            </span>
-                          </div>
+                          )}
+
+                          {!song.previewUrl && <div className="text-pink-400 text-sm mb-2">No preview available</div>}
                         </div>
 
                         <div className="flex items-center gap-3">
-                          {song.previewUrl ? (
-                            <button
-                              onClick={() => togglePlay(song)}
-                              className={`bg-white text-pink-500 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 ${
-                                isPlaying ? "ring-2 ring-pink-400" : ""
-                              }`}
-                            >
-                              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-                            </button>
-                          ) : (
-                            <div className="text-pink-400 text-sm">No preview</div>
-                          )}
-
                           <button
                             onClick={() => handleSongSelect(song)}
                             className={`px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${
@@ -200,34 +203,52 @@ export default function SendMessageDesktop() {
 
                 {/* Selected Song Display - Larger version */}
                 {selectedSong && (
-                  <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-6 mb-8">
-                    <div className="flex items-center gap-4">
+                  <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-6 mb-8 relative">
+                    {/* Play Button - Top Right Corner */}
+                    {selectedSong.previewUrl && (
+                      <button
+                        onClick={() => togglePlay(selectedSong)}
+                        className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                          currentlyPlaying === selectedSong.id
+                            ? "bg-pink-500 text-white"
+                            : "bg-white text-pink-500 hover:bg-pink-50"
+                        }`}
+                      >
+                        {currentlyPlaying === selectedSong.id ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4 ml-0.5" />
+                        )}
+                      </button>
+                    )}
+
+                    <div className="flex items-center gap-4 pr-12">
                       <img
                         src={selectedSong.image || "/placeholder.svg"}
                         alt="Album cover"
                         className="w-24 h-24 rounded-xl object-cover shadow-lg"
                       />
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-bold text-pink-800 text-2xl mb-1">{selectedSong.title}</h3>
-                        <p className="text-pink-600 text-lg">{selectedSong.artist}</p>
-                        
-                        {/* Play button */}
-                        <button
-                          onClick={() => togglePlay(selectedSong)}
-                          className={`mt-3 bg-white text-pink-500 px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 ${
-                            currentlyPlaying === selectedSong.id ? "ring-2 ring-pink-400" : ""
-                          }`}
-                        >
-                          {currentlyPlaying === selectedSong.id ? (
-                            <>
-                              <Pause className="w-4 h-4" /> Pause Preview
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4" /> Play Preview
-                            </>
-                          )}
-                        </button>
+                        <p className="text-pink-600 text-lg mb-3">{selectedSong.artist}</p>
+
+                        {/* Progress Bar - Only show when playing */}
+                        {currentlyPlaying === selectedSong.id && (
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="flex-1 bg-pink-200 h-2 rounded-full cursor-pointer"
+                              onClick={(e) => handleProgressClick(selectedSong, e)}
+                            >
+                              <div
+                                className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                                style={{ width: `${progress[selectedSong.id] || 0}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-pink-600 min-w-[50px]">
+                              {timeRemaining[selectedSong.id] || "-0:30"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

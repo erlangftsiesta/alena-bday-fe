@@ -1,100 +1,81 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export interface LoginCredentials {
-  email: string
-  password: string
+  username: string;
+  password: string;
 }
 
 export interface User {
-  id: string
-  name: string
-  email: string
-  avatar: string
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
 }
+const API_URL = import.meta.env.API_URL;
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  const login = useCallback(async (credentials: LoginCredentials) => {
-    setLoading(true)
-    setError(null)
-
+  const fetchUser = useCallback(async () => {
+    setLoading(true);
     try {
-      // Mock API call - replace with actual endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Simple validation
-      if (!credentials.email || !credentials.password) {
-        throw new Error("Please fill in all fields sweetie! 💕")
-      }
-
-      if (!credentials.email.includes("@")) {
-        throw new Error("Please enter a valid email address darling! 📧")
-      }
-
-      if (credentials.password.length < 6) {
-        throw new Error("Password should be at least 6 characters honey! 🔒")
-      }
-
-      // Mock successful login
-      const mockUser: User = {
-        id: "1",
-        name: "Sarah Johnson",
-        email: credentials.email,
-        avatar: "/placeholder.svg?height=120&width=120",
-      }
-
-      setUser(mockUser)
-      setIsAuthenticated(true)
-      return true
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong sweetie! 💔")
-      return false
+      const res = await axios.get(`${API_URL}/me`, { withCredentials: true });
+      setUser(res.data);
+      setIsAuthenticated(true);
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  const loginWithGoogle = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
-    try {
-      // Mock Google login
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+  const login = useCallback(
+    async (credentials: LoginCredentials) => {
+      setLoading(true);
+      setError(null);
 
-      const mockUser: User = {
-        id: "2",
-        name: "Google User",
-        email: "user@gmail.com",
-        avatar: "/placeholder.svg?height=120&width=120",
+      try {
+        const res = await axios.post(`${API_URL}/login`, credentials, {
+          withCredentials: true,
+        });
+        console.log("Login response:", res.data);
+
+        await fetchUser();
+        navigate("/homepage"); // ✅ Redirect ke homepage
+        return true;
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Login failed");
+        return false;
+      } finally {
+        setLoading(false);
       }
+    },
+    [fetchUser, navigate]
+  );
 
-      setUser(mockUser)
-      setIsAuthenticated(true)
-      return true
-    } catch (err) {
-      setError("Google login failed sweetie! Try again? 🥺")
-      return false
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  const logout = useCallback(() => {
-    setUser(null)
-    setIsAuthenticated(false)
-    setError(null)
-  }, [])
+  const logout = useCallback(async () => {
+    await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+    setUser(null);
+    setIsAuthenticated(false);
+    navigate("/send-message");
+  }, [navigate]);
 
   const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+    setError(null);
+  }, []);
 
   return {
     user,
@@ -102,8 +83,8 @@ export function useAuth() {
     error,
     isAuthenticated,
     login,
-    loginWithGoogle,
     logout,
     clearError,
-  }
+    fetchUser,
+  };
 }

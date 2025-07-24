@@ -1,7 +1,21 @@
 "use client"
 
-import { Heart, Gift, Music, Sparkles, Lock, Globe, X, Star, RefreshCw } from 'lucide-react'
-import { useHomepage } from '../../../hooks/useHomepage'
+import {
+  Heart,
+  Gift,
+  Music,
+  Sparkles,
+  Lock,
+  Globe,
+  X,
+  Star,
+  RefreshCw,
+  Play,
+  Pause,
+  Eye,
+  CheckIcon as EyeCheck,
+} from "lucide-react"
+import { useHomepage } from "../../../hooks/useHomepage"
 
 export default function HomepageDesktop() {
   const {
@@ -11,11 +25,23 @@ export default function HomepageDesktop() {
     showModal,
     loading,
     error,
+    currentlyPlaying,
+    progress,
+    timeRemaining,
     openGift,
     closeModal,
     refreshMessages,
     toggleMessagePrivacy,
+    togglePlay,
+    markMessageAsRead,
+    markAllAsRead,
   } = useHomepage()
+
+  const handleMessageClick = async (message: any) => {
+    if (message.isNew) {
+      await markMessageAsRead(message.id)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 relative overflow-hidden">
@@ -61,8 +87,8 @@ export default function HomepageDesktop() {
               disabled={loading}
               className="bg-white/80 backdrop-blur-sm text-pink-600 px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-3 mx-auto"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Refreshing Messages...' : 'Refresh Messages'}
+              <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
+              {loading ? "Refreshing Messages..." : "Refresh Messages"}
             </button>
           </div>
 
@@ -90,12 +116,21 @@ export default function HomepageDesktop() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
+                      <Heart className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-red-800">{notification.newMessages}</p>
+                      <p className="text-red-600">New Messages</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-orange-600" />
+                      <Lock className="w-6 h-6 text-orange-600" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-pink-800">{notification.unreadMessages}</p>
-                      <p className="text-pink-600">New Messages</p>
+                      <p className="text-pink-600">Private Messages</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -118,9 +153,16 @@ export default function HomepageDesktop() {
             {/* Center - Gift Box */}
             <div className="flex justify-center">
               <div className="relative">
-                {/* Notification Badge */}
+                {/* New Messages Badge - Red */}
+                {notification.newMessages > 0 && !isGiftOpened && (
+                  <div className="absolute -top-4 -right-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-lg font-bold shadow-xl animate-bounce z-10">
+                    {notification.newMessages}
+                  </div>
+                )}
+
+                {/* Total Messages Badge - Pink */}
                 {notification.totalMessages > 0 && !isGiftOpened && (
-                  <div className="absolute -top-4 -right-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-lg font-bold shadow-xl animate-bounce z-10">
+                  <div className="absolute -top-4 -left-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-lg font-bold shadow-xl z-10">
                     {notification.totalMessages}
                   </div>
                 )}
@@ -224,9 +266,18 @@ export default function HomepageDesktop() {
               </div>
 
               {!isGiftOpened ? (
-                <div className="bg-gradient-to-r from-pink-400 to-pink-600 text-white rounded-3xl p-6 shadow-xl">
-                  <p className="text-xl font-bold mb-2">{notification.totalMessages} love messages waiting! 💌</p>
-                  <p className="text-pink-100">Click to unwrap your musical surprises</p>
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-pink-400 to-pink-600 text-white rounded-3xl p-6 shadow-xl">
+                    <p className="text-xl font-bold mb-2">{notification.totalMessages} love messages waiting! 💌</p>
+                    <p className="text-pink-100">Click to unwrap your musical surprises</p>
+                  </div>
+
+                  {notification.newMessages > 0 && (
+                    <div className="bg-gradient-to-r from-red-400 to-red-600 text-white rounded-3xl p-6 shadow-xl animate-pulse">
+                      <p className="text-xl font-bold mb-2">🔥 {notification.newMessages} NEW messages!</p>
+                      <p className="text-red-100">Fresh love songs just arrived!</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-3xl p-6 shadow-xl animate-pulse">
@@ -251,9 +302,29 @@ export default function HomepageDesktop() {
               >
                 <X className="w-8 h-8" />
               </button>
+
+              {/* Mark All as Read Button */}
+              {notification.newMessages > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  disabled={loading}
+                  className="absolute top-6 left-6 bg-white/20 text-white px-4 py-2 rounded-full font-medium hover:bg-white/30 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  <EyeCheck className="w-4 h-4" />
+                  Mark All Read
+                </button>
+              )}
+
               <div className="text-center">
                 <h2 className="text-4xl font-bold mb-4">Your Love Messages 💕</h2>
-                <p className="text-xl text-pink-100">{messages.length} beautiful songs just for you!</p>
+                <p className="text-xl text-pink-100">
+                  {messages.length} beautiful songs just for you!
+                  {notification.newMessages > 0 && (
+                    <span className="block text-yellow-200 font-semibold mt-2">
+                      ✨ {notification.newMessages} new messages!
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -263,22 +334,84 @@ export default function HomepageDesktop() {
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
-                    className="bg-gradient-to-r from-pink-50 to-orange-50 rounded-2xl p-6 border border-pink-200 animate-fade-in hover:shadow-lg transition-all duration-200"
+                    onClick={() => handleMessageClick(message)}
+                    className={`rounded-2xl p-6 border-2 animate-fade-in hover:shadow-lg transition-all duration-200 relative cursor-pointer ${
+                      message.isNew
+                        ? "bg-gradient-to-r from-red-50 to-pink-50 border-red-300 shadow-lg ring-2 ring-red-200"
+                        : "bg-gradient-to-r from-pink-50 to-orange-50 border-pink-200"
+                    }`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="flex items-start gap-4">
+                    {/* New Message Indicator */}
+                    {message.isNew && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold animate-pulse">
+                        NEW
+                      </div>
+                    )}
+
+                    {/* Play Button - Top Right Corner */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        togglePlay(message)
+                      }}
+                      className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                        currentlyPlaying === message.id
+                          ? "bg-pink-500 text-white"
+                          : "bg-white text-pink-500 hover:bg-pink-50"
+                      }`}
+                    >
+                      {currentlyPlaying === message.id ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5 ml-0.5" />
+                      )}
+                    </button>
+
+                    <div className="flex items-start gap-4 pr-12">
                       <img
                         src={message.albumCover || "/placeholder.svg"}
                         alt="Album"
                         className="w-16 h-16 rounded-xl object-cover shadow-md"
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-pink-800 text-lg truncate">{message.songTitle}</h3>
-                        <p className="text-pink-600 text-sm mb-3">{message.artist}</p>
-                        <p className="text-pink-700 leading-relaxed mb-3">{message.message}</p>
+                        <h3
+                          className={`font-bold text-lg truncate ${message.isNew ? "text-red-800" : "text-pink-800"}`}
+                        >
+                          {message.songTitle}
+                        </h3>
+                        <p className={`text-sm mb-3 ${message.isNew ? "text-red-600" : "text-pink-600"}`}>
+                          {message.artist}
+                        </p>
+                        <p className={`leading-relaxed mb-3 ${message.isNew ? "text-red-700" : "text-pink-700"}`}>
+                          {message.message}
+                        </p>
+
+                        {/* Progress Bar - Only show when playing */}
+                        {currentlyPlaying === message.id && (
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="flex-1 bg-pink-200 h-2 rounded-full">
+                              <div
+                                className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                                style={{ width: `${progress[message.id] || 0}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-pink-600 min-w-[45px]">
+                              {timeRemaining[message.id] || "-0:30"}
+                            </span>
+                          </div>
+                        )}
+
                         <div className="flex justify-between items-center">
-                          <span className="text-pink-500 text-sm font-medium">From: {message.sender}</span>
-                          <span className="text-pink-400 text-sm">{message.date}</span>
+                          <span className={`text-sm font-medium ${message.isNew ? "text-red-500" : "text-pink-500"}`}>
+                            From: {message.sender}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {message.isNew && <Eye className="w-4 h-4 text-red-400" />}
+                            <span className={`text-sm ${message.isNew ? "text-red-400" : "text-pink-400"}`}>
+                              {message.date}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -292,26 +425,74 @@ export default function HomepageDesktop() {
               <h3 className="text-2xl font-bold text-pink-800 text-center mb-6">Choose privacy for each message:</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 overflow-y-auto">
                 {messages.map((message) => (
-                  <div key={message.id} className="bg-white rounded-2xl p-4 border border-pink-200 shadow-sm">
-                    <div className="flex items-center gap-3 mb-3">
+                  <div
+                    key={message.id}
+                    className={`bg-white rounded-2xl p-4 border-2 shadow-sm relative ${
+                      message.isNew ? "border-red-200 bg-red-50" : "border-pink-200"
+                    }`}
+                  >
+                    {/* New indicator */}
+                    {message.isNew && (
+                      <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                        !
+                      </div>
+                    )}
+
+                    {/* Play Button - Top Right Corner */}
+                    <button
+                      onClick={() => togglePlay(message)}
+                      className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 ${
+                        currentlyPlaying === message.id
+                          ? "bg-pink-500 text-white"
+                          : "bg-white text-pink-500 hover:bg-pink-50"
+                      }`}
+                    >
+                      {currentlyPlaying === message.id ? (
+                        <Pause className="w-3 h-3" />
+                      ) : (
+                        <Play className="w-3 h-3 ml-0.5" />
+                      )}
+                    </button>
+
+                    <div className="flex items-center gap-3 mb-3 pr-8">
                       <img
                         src={message.albumCover || "/placeholder.svg"}
                         alt="Album"
                         className="w-12 h-12 rounded-lg object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-pink-800 font-semibold truncate">{message.songTitle}</p>
-                        <p className="text-pink-600 text-sm truncate">From: {message.sender}</p>
+                        <p className={`font-semibold truncate ${message.isNew ? "text-red-800" : "text-pink-800"}`}>
+                          {message.songTitle}
+                        </p>
+                        <p className={`text-sm truncate ${message.isNew ? "text-red-600" : "text-pink-600"}`}>
+                          From: {message.sender}
+                        </p>
                       </div>
                     </div>
+
+                    {/* Progress Bar - Only show when playing */}
+                    {currentlyPlaying === message.id && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex-1 bg-pink-200 h-1 rounded-full">
+                          <div
+                            className="bg-pink-500 h-full rounded-full transition-all duration-100"
+                            style={{ width: `${progress[message.id] || 0}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-pink-600 min-w-[35px]">
+                          {timeRemaining[message.id] || "-0:30"}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex gap-3">
                       <button
                         onClick={() => toggleMessagePrivacy(message.id, false)}
                         disabled={loading || !message.isPublic}
                         className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                          !message.isPublic 
-                            ? 'bg-pink-500 text-white shadow-lg' 
-                            : 'bg-gray-200 text-gray-600 hover:bg-pink-200 hover:text-pink-700'
+                          !message.isPublic
+                            ? "bg-pink-500 text-white shadow-lg"
+                            : "bg-gray-200 text-gray-600 hover:bg-pink-200 hover:text-pink-700"
                         } disabled:opacity-50`}
                       >
                         <Lock className="w-4 h-4" />
@@ -321,9 +502,9 @@ export default function HomepageDesktop() {
                         onClick={() => toggleMessagePrivacy(message.id, true)}
                         disabled={loading || message.isPublic}
                         className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                          message.isPublic 
-                            ? 'bg-orange-500 text-white shadow-lg' 
-                            : 'bg-gray-200 text-gray-600 hover:bg-orange-200 hover:text-orange-700'
+                          message.isPublic
+                            ? "bg-orange-500 text-white shadow-lg"
+                            : "bg-gray-200 text-gray-600 hover:bg-orange-200 hover:text-orange-700"
                         } disabled:opacity-50`}
                       >
                         <Globe className="w-4 h-4" />
