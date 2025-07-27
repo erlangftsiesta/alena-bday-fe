@@ -1,9 +1,11 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Heart, Play, Pause, Music, X, Sparkles, Globe } from 'lucide-react'
-import { usePublicMessages } from '../../../hooks/usePublicMessage'
+import { Heart, Play, Pause, Music, X, Sparkles, Globe } from "lucide-react";
+import { usePublicMessages } from "../../../hooks/usePublicMessage";
+import { useAuth } from "../../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function PublicMessagesMobile() {
   const {
@@ -20,28 +22,37 @@ export default function PublicMessagesMobile() {
     openModal,
     closeModal,
     setProgressManually,
-  } = usePublicMessages()
+  } = usePublicMessages();
 
-  const handleProgressClick = (message: any, event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const clickX = event.clientX - rect.left
-    const percentage = (clickX / rect.width) * 100
-    setProgressManually(message, percentage)
-  }
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleProgressClick = (
+    message: any,
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    setProgressManually(message, percentage);
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-pink-600 font-medium">Loading love messages... 💕</p>
+          <p className="text-pink-600 font-medium">
+            Loading love messages... 💕
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 p-4">
+      
       {/* Decorative Elements */}
       <div className="absolute top-10 left-6 text-pink-300 animate-pulse">
         <Heart className="w-6 h-6" />
@@ -54,15 +65,21 @@ export default function PublicMessagesMobile() {
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Globe className="w-6 h-6 text-pink-500" />
-          <h1 className="text-2xl font-bold text-pink-800">Public Love Messages</h1>
+          <h1 className="text-2xl font-bold text-pink-800">
+            Public Love Messages
+          </h1>
           <Globe className="w-6 h-6 text-pink-500" />
         </div>
-        <p className="text-pink-600 text-sm">Beautiful songs shared with the world 🌍💕</p>
+        <p className="text-pink-600 text-sm">
+          Beautiful songs shared with the world 🌍💕
+        </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4">{error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4">
+          {error}
+        </div>
       )}
 
       {/* Messages List */}
@@ -83,8 +100,12 @@ export default function PublicMessagesMobile() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-pink-800 text-sm truncate">{message.songTitle}</h3>
-                    <p className="text-pink-600 text-xs truncate">{message.artist}</p>
+                    <h3 className="font-bold text-pink-800 text-sm truncate">
+                      {message.songTitle}
+                    </h3>
+                    <p className="text-pink-600 text-xs truncate">
+                      {message.artist}
+                    </p>
                   </div>
                   <button
                     onClick={() => togglePlay(message)}
@@ -109,7 +130,9 @@ export default function PublicMessagesMobile() {
                       style={{ width: `${progress[message.id] || 0}%` }}
                     />
                   </div>
-                  <span className="text-xs text-pink-600 min-w-[35px]">{timeRemaining[message.id] || "-0:30"}</span>
+                  <span className="text-xs text-pink-600 min-w-[35px]">
+                    {timeRemaining[message.id] || "-0:30"}
+                  </span>
                 </div>
 
                 {/* Message Preview */}
@@ -121,8 +144,12 @@ export default function PublicMessagesMobile() {
                     {truncateMessage(message.message, 60)}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-pink-500 text-xs font-medium">From: {message.sender}</span>
-                    <span className="text-pink-400 text-xs">{new Date(message.date).toLocaleDateString()}</span>
+                    <span className="text-pink-500 text-xs font-medium">
+                      From: {message.sender}
+                    </span>
+                    <span className="text-pink-400 text-xs">
+                      {new Date(message.date).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -135,7 +162,9 @@ export default function PublicMessagesMobile() {
       {messages.length === 0 && !loading && (
         <div className="text-center py-12">
           <Music className="w-16 h-16 text-pink-300 mx-auto mb-4" />
-          <p className="text-pink-600 text-lg font-medium">No public messages yet</p>
+          <p className="text-pink-600 text-lg font-medium">
+            No public messages yet
+          </p>
         </div>
       )}
 
@@ -152,8 +181,12 @@ export default function PublicMessagesMobile() {
                 <X className="w-6 h-6" />
               </button>
               <div className="text-center">
-                <h2 className="text-xl font-bold mb-1">{selectedMessage.songTitle}</h2>
-                <p className="text-pink-100 text-sm">{selectedMessage.artist}</p>
+                <h2 className="text-xl font-bold mb-1">
+                  {selectedMessage.songTitle}
+                </h2>
+                <p className="text-pink-100 text-sm">
+                  {selectedMessage.artist}
+                </p>
               </div>
             </div>
 
@@ -170,13 +203,19 @@ export default function PublicMessagesMobile() {
               <div className="space-y-4">
                 <div>
                   <h3 className="text-pink-800 font-semibold mb-2">Message:</h3>
-                  <p className="text-pink-700 leading-relaxed bg-pink-50 p-4 rounded-xl">{selectedMessage.message}</p>
+                  <p className="text-pink-700 leading-relaxed bg-pink-50 p-4 rounded-xl">
+                    {selectedMessage.message}
+                  </p>
                 </div>
 
                 <div className="flex justify-between items-center pt-4 border-t border-pink-200">
                   <div>
-                    <p className="text-pink-600 font-medium">From: {selectedMessage.sender}</p>
-                    <p className="text-pink-500 text-sm">{new Date(selectedMessage.date).toLocaleDateString()}</p>
+                    <p className="text-pink-600 font-medium">
+                      From: {selectedMessage.sender}
+                    </p>
+                    <p className="text-pink-500 text-sm">
+                      {new Date(selectedMessage.date).toLocaleDateString()}
+                    </p>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-2 text-pink-500">
@@ -219,5 +258,5 @@ export default function PublicMessagesMobile() {
         }
       `}</style>
     </div>
-  )
+  );
 }
