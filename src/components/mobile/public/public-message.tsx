@@ -24,9 +24,6 @@ export default function PublicMessagesMobile() {
     setProgressManually,
   } = usePublicMessages();
 
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
   const handleProgressClick = (
     message: any,
     event: React.MouseEvent<HTMLDivElement>
