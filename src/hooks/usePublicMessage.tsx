@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { API_URL } from "../constant";
 
 export interface PublicMessage {
   id: string;
@@ -96,7 +97,7 @@ export function usePublicMessages() {
     setError(null);
 
     try {
-      const response = await axios.get<PublicMessage[]>("http://localhost:3000/messages/public-messages");
+      const response = await axios.get<PublicMessage[]>(`${API_URL}/messages/public-messages`);
       setMessages(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load messages");

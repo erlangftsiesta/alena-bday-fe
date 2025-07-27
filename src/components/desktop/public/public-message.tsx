@@ -148,9 +148,7 @@ export default function PublicMessagesDesktop() {
           {messages.length === 0 && !loading && (
             <div className="text-center py-20">
               <Music className="w-24 h-24 text-pink-300 mx-auto mb-6" />
-              <p className="text-pink-600 text-2xl font-medium mb-2">No public messages yet</p>
-              <p className="text-pink-500 text-lg">Be the first to share your love with the world! 💕</p>
-            </div>
+              <p className="text-pink-600 text-2xl font-medium mb-2">No public messages yet</p>            </div>
           )}
         </div>
       </div>

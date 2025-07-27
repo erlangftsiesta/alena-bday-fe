@@ -332,7 +332,7 @@ export default function HomepageMobile() {
                           e.stopPropagation()
                           toggleMessagePrivacy(message.id, true)
                         }}
-                        disabled={loading || message.isPublic}
+                        disabled={loading || Boolean(message.isPublic)}
                         className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
                           message.isPublic
                             ? "bg-orange-500 text-white"

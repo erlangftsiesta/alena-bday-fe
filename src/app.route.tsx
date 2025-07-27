@@ -1,17 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SendMessagePage from "./pages/send-message";
 import ProfilePage from "./pages/profile";
 import LoginPage from "./pages/login";
 import Homepage from "./pages/homepage";
 import PublicMessagesPage from "./pages/public-message";
 import PrivateMessagesPage from "./pages/private-message";
-import ProtectedRoute from "./helper/protectedRoutes";
+import {ProtectedRoute, RootRedirect} from "./helper/protectedRoutes"; // ✅ import ini
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/send-message" replace />} />
+        <Route path="/" element={<RootRedirect />} /> {/* ✅ updated */}
         <Route path="/send-message" element={<SendMessagePage />} />
         <Route path="/login" element={<LoginPage />} />
 
@@ -23,7 +23,6 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
@@ -42,7 +41,7 @@ export default function AppRoutes() {
           }
         />
 
-        {/* Optional: 404 page */}
+        {/* Optional: 404 */}
         {/* <Route path="*" element={<NotFoundPage />} /> */}
       </Routes>
     </BrowserRouter>

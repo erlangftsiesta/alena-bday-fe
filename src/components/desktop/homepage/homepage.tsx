@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Heart,
@@ -14,8 +14,8 @@ import {
   Pause,
   Eye,
   CheckIcon as EyeCheck,
-} from "lucide-react"
-import { useHomepage } from "../../../hooks/useHomepage"
+} from "lucide-react";
+import { useHomepage } from "../../../hooks/useHomepage";
 
 export default function HomepageDesktop() {
   const {
@@ -35,13 +35,13 @@ export default function HomepageDesktop() {
     togglePlay,
     markMessageAsRead,
     markAllAsRead,
-  } = useHomepage()
+  } = useHomepage();
 
   const handleMessageClick = async (message: any) => {
     if (message.isNew) {
-      await markMessageAsRead(message.id)
+      await markMessageAsRead(message.id);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-orange-50 to-pink-200 relative overflow-hidden">
@@ -76,8 +76,12 @@ export default function HomepageDesktop() {
               </h1>
               <Heart className="w-12 h-12 text-pink-500 animate-pulse" />
             </div>
-            <p className="text-2xl text-pink-600 font-medium mb-4">Your special messages await! 💕</p>
-            <p className="text-lg text-pink-500">Click the magical gift to reveal your love songs ✨</p>
+            <p className="text-2xl text-pink-600 font-medium mb-4">
+              Your special messages await! 💕
+            </p>
+            <p className="text-lg text-pink-500">
+              Click the magical gift to reveal your love songs ✨
+            </p>
           </div>
 
           {/* Refresh Button */}
@@ -87,7 +91,9 @@ export default function HomepageDesktop() {
               disabled={loading}
               className="bg-white/80 backdrop-blur-sm text-pink-600 px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-3 mx-auto"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+              />
               {loading ? "Refreshing Messages..." : "Refresh Messages"}
             </button>
           </div>
@@ -104,14 +110,18 @@ export default function HomepageDesktop() {
             {/* Left Side - Stats */}
             <div className="text-center lg:text-left space-y-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-pink-200">
-                <h3 className="text-2xl font-bold text-pink-800 mb-6">Love Statistics 💖</h3>
+                <h3 className="text-2xl font-bold text-pink-800 mb-6">
+                  Love Statistics 💖
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-pink-200 rounded-full flex items-center justify-center">
                       <Music className="w-6 h-6 text-pink-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-pink-800">{notification.totalMessages}</p>
+                      <p className="text-2xl font-bold text-pink-800">
+                        {notification.totalMessages}
+                      </p>
                       <p className="text-pink-600">Love Messages</p>
                     </div>
                   </div>
@@ -120,7 +130,9 @@ export default function HomepageDesktop() {
                       <Heart className="w-6 h-6 text-red-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-red-800">{notification.newMessages}</p>
+                      <p className="text-2xl font-bold text-red-800">
+                        {notification.newMessages}
+                      </p>
                       <p className="text-red-600">New Messages</p>
                     </div>
                   </div>
@@ -129,7 +141,9 @@ export default function HomepageDesktop() {
                       <Lock className="w-6 h-6 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-pink-800">{notification.unreadMessages}</p>
+                      <p className="text-2xl font-bold text-pink-800">
+                        {notification.unreadMessages}
+                      </p>
                       <p className="text-pink-600">Private Messages</p>
                     </div>
                   </div>
@@ -140,7 +154,9 @@ export default function HomepageDesktop() {
                     <div>
                       <p className="text-lg font-bold text-pink-800">
                         {notification.lastMessageDate
-                          ? new Date(notification.lastMessageDate).toLocaleDateString()
+                          ? new Date(
+                              notification.lastMessageDate
+                            ).toLocaleDateString()
                           : "N/A"}
                       </p>
                       <p className="text-pink-600">Last Message</p>
@@ -183,7 +199,9 @@ export default function HomepageDesktop() {
                     {/* Gift Box Lid */}
                     <div
                       className={`absolute -top-4 left-0 w-full h-12 bg-gradient-to-br from-pink-500 to-pink-700 rounded-t-3xl transition-all duration-800 transform-gpu ${
-                        isGiftOpened ? "-translate-y-12 rotate-12 opacity-80" : ""
+                        isGiftOpened
+                          ? "-translate-y-12 rotate-12 opacity-80"
+                          : ""
                       }`}
                     />
 
@@ -204,7 +222,9 @@ export default function HomepageDesktop() {
                     {/* Bow */}
                     <div
                       className={`absolute -top-8 left-1/2 transform -translate-x-1/2 transition-all duration-800 ${
-                        isGiftOpened ? "-translate-y-8 rotate-45 opacity-60" : ""
+                        isGiftOpened
+                          ? "-translate-y-8 rotate-45 opacity-60"
+                          : ""
                       }`}
                     >
                       <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full" />
@@ -242,7 +262,9 @@ export default function HomepageDesktop() {
             {/* Right Side - Instructions */}
             <div className="text-center lg:text-right space-y-6">
               <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-pink-200">
-                <h3 className="text-2xl font-bold text-pink-800 mb-6">How it Works ✨</h3>
+                <h3 className="text-2xl font-bold text-pink-800 mb-6">
+                  How it Works ✨
+                </h3>
                 <div className="space-y-4 text-left">
                   <div className="flex items-center gap-4">
                     <div className="w-8 h-8 bg-pink-200 rounded-full flex items-center justify-center text-pink-600 font-bold">
@@ -268,21 +290,33 @@ export default function HomepageDesktop() {
               {!isGiftOpened ? (
                 <div className="space-y-4">
                   <div className="bg-gradient-to-r from-pink-400 to-pink-600 text-white rounded-3xl p-6 shadow-xl">
-                    <p className="text-xl font-bold mb-2">{notification.totalMessages} love messages waiting! 💌</p>
-                    <p className="text-pink-100">Click to unwrap your musical surprises</p>
+                    <p className="text-xl font-bold mb-2">
+                      {notification.totalMessages} love messages waiting! 💌
+                    </p>
+                    <p className="text-pink-100">
+                      Click to unwrap your musical surprises
+                    </p>
                   </div>
 
                   {notification.newMessages > 0 && (
                     <div className="bg-gradient-to-r from-red-400 to-red-600 text-white rounded-3xl p-6 shadow-xl animate-pulse">
-                      <p className="text-xl font-bold mb-2">🔥 {notification.newMessages} NEW messages!</p>
-                      <p className="text-red-100">Fresh love songs just arrived!</p>
+                      <p className="text-xl font-bold mb-2">
+                        🔥 {notification.newMessages} NEW messages!
+                      </p>
+                      <p className="text-red-100">
+                        Fresh love songs just arrived!
+                      </p>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-3xl p-6 shadow-xl animate-pulse">
-                  <p className="text-xl font-bold mb-2">Opening your love box... 💕</p>
-                  <p className="text-pink-100">Get ready for something magical!</p>
+                  <p className="text-xl font-bold mb-2">
+                    Opening your love box... 💕
+                  </p>
+                  <p className="text-pink-100">
+                    Get ready for something magical!
+                  </p>
                 </div>
               )}
             </div>
@@ -316,7 +350,9 @@ export default function HomepageDesktop() {
               )}
 
               <div className="text-center">
-                <h2 className="text-4xl font-bold mb-4">Your Love Messages 💕</h2>
+                <h2 className="text-4xl font-bold mb-4">
+                  Your Love Messages 💕
+                </h2>
                 <p className="text-xl text-pink-100">
                   {messages.length} beautiful songs just for you!
                   {notification.newMessages > 0 && (
@@ -336,13 +372,12 @@ export default function HomepageDesktop() {
                     key={message.id}
                     onClick={() => handleMessageClick(message)}
                     className={`rounded-2xl p-6 border-2 animate-fade-in hover:shadow-lg transition-all duration-200 relative cursor-pointer ${
-                      message.isNew
+                      Boolean(message.isNew)
                         ? "bg-gradient-to-r from-red-50 to-pink-50 border-red-300 shadow-lg ring-2 ring-red-200"
                         : "bg-gradient-to-r from-pink-50 to-orange-50 border-pink-200"
                     }`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* New Message Indicator */}
                     {message.isNew && (
                       <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold animate-pulse">
                         NEW
@@ -352,8 +387,8 @@ export default function HomepageDesktop() {
                     {/* Play Button - Top Right Corner */}
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
-                        togglePlay(message)
+                        e.stopPropagation();
+                        togglePlay(message);
                       }}
                       className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
                         currentlyPlaying === message.id
@@ -376,14 +411,24 @@ export default function HomepageDesktop() {
                       />
                       <div className="flex-1 min-w-0">
                         <h3
-                          className={`font-bold text-lg truncate ${message.isNew ? "text-red-800" : "text-pink-800"}`}
+                          className={`font-bold text-lg truncate ${
+                            message.isNew ? "text-red-800" : "text-pink-800"
+                          }`}
                         >
                           {message.songTitle}
                         </h3>
-                        <p className={`text-sm mb-3 ${message.isNew ? "text-red-600" : "text-pink-600"}`}>
+                        <p
+                          className={`text-sm mb-3 ${
+                            message.isNew ? "text-red-600" : "text-pink-600"
+                          }`}
+                        >
                           {message.artist}
                         </p>
-                        <p className={`leading-relaxed mb-3 ${message.isNew ? "text-red-700" : "text-pink-700"}`}>
+                        <p
+                          className={`leading-relaxed mb-3 ${
+                            message.isNew ? "text-red-700" : "text-pink-700"
+                          }`}
+                        >
                           {message.message}
                         </p>
 
@@ -393,7 +438,9 @@ export default function HomepageDesktop() {
                             <div className="flex-1 bg-pink-200 h-2 rounded-full">
                               <div
                                 className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                                style={{ width: `${progress[message.id] || 0}%` }}
+                                style={{
+                                  width: `${progress[message.id] || 0}%`,
+                                }}
                               />
                             </div>
                             <span className="text-sm text-pink-600 min-w-[45px]">
@@ -403,12 +450,20 @@ export default function HomepageDesktop() {
                         )}
 
                         <div className="flex justify-between items-center">
-                          <span className={`text-sm font-medium ${message.isNew ? "text-red-500" : "text-pink-500"}`}>
+                          <span
+                            className={`text-sm font-medium ${
+                              message.isNew ? "text-red-500" : "text-pink-500"
+                            }`}
+                          >
                             From: {message.sender}
                           </span>
                           <div className="flex items-center gap-2">
-                            {message.isNew && <Eye className="w-4 h-4 text-red-400" />}
-                            <span className={`text-sm ${message.isNew ? "text-red-400" : "text-pink-400"}`}>
+                            {<Eye className="w-4 h-4 text-red-400" />}
+                            <span
+                              className={`text-sm ${
+                                message.isNew ? "text-red-400" : "text-pink-400"
+                              }`}
+                            >
                               {message.date}
                             </span>
                           </div>
@@ -422,13 +477,17 @@ export default function HomepageDesktop() {
 
             {/* Action Buttons - Per Message */}
             <div className="p-8 bg-pink-50 border-t border-pink-200">
-              <h3 className="text-2xl font-bold text-pink-800 text-center mb-6">Choose privacy for each message:</h3>
+              <h3 className="text-2xl font-bold text-pink-800 text-center mb-6">
+                Choose privacy for each message:
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 overflow-y-auto">
                 {messages.map((message) => (
                   <div
                     key={message.id}
                     className={`bg-white rounded-2xl p-4 border-2 shadow-sm relative ${
-                      message.isNew ? "border-red-200 bg-red-50" : "border-pink-200"
+                      message.isNew
+                        ? "border-red-200 bg-red-50"
+                        : "border-pink-200"
                     }`}
                   >
                     {/* New indicator */}
@@ -461,10 +520,18 @@ export default function HomepageDesktop() {
                         className="w-12 h-12 rounded-lg object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className={`font-semibold truncate ${message.isNew ? "text-red-800" : "text-pink-800"}`}>
+                        <p
+                          className={`font-semibold truncate ${
+                            message.isNew ? "text-red-800" : "text-pink-800"
+                          }`}
+                        >
                           {message.songTitle}
                         </p>
-                        <p className={`text-sm truncate ${message.isNew ? "text-red-600" : "text-pink-600"}`}>
+                        <p
+                          className={`text-sm truncate ${
+                            message.isNew ? "text-red-600" : "text-pink-600"
+                          }`}
+                        >
                           From: {message.sender}
                         </p>
                       </div>
@@ -500,7 +567,7 @@ export default function HomepageDesktop() {
                       </button>
                       <button
                         onClick={() => toggleMessagePrivacy(message.id, true)}
-                        disabled={loading || message.isPublic}
+                        disabled={loading || Boolean(message.isPublic)}
                         className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                           message.isPublic
                             ? "bg-orange-500 text-white shadow-lg"
@@ -558,5 +625,5 @@ export default function HomepageDesktop() {
         }
       `}</style>
     </div>
-  )
+  );
 }

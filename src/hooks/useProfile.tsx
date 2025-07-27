@@ -1,65 +1,71 @@
-"use client"
+import { useState, useCallback, useEffect } from "react";
+import axios from "axios";
+import { API_URL } from "../constant";
 
-import { useState, useCallback } from "react"
-
-export interface UserProfile {
-  id: string
-  name: string
-  email: string
-  bio: string
-  avatar: string
-  joinDate: string
+interface UserProfile {
+  id: string;
+  name: string;
+  username: string;
+  bio: string;
+  avatar: string;
+  createdAt: string;
 }
 
-export function useProfileCrud() {
-  const [profile, setProfile] = useState<UserProfile>({
-    id: "1",
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    bio: "Music lover 🎵 | Spreading love through songs 💕",
-    avatar: "/placeholder.svg?height=120&width=120",
-    joinDate: "2024-01-15",
-  })
-  
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export function useProfile() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get<UserProfile>(`${API_URL}/auth/me`, {withCredentials: true});
+      setProfile(res.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch profile");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
-    setLoading(true)
-    setError(null)
-
+    setLoading(true);
+    setError(null);
     try {
-      // Mock API call - replace with actual endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      
-      setProfile(prev => ({ ...prev, ...updates }))
-      return true
+      const res = await axios.patch<UserProfile>(`${API_URL}/users/1`, updates, {withCredentials: true});
+      setProfile(res.data); // anggap backend return data yg udah terupdate
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile")
-      return false
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+      return false;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const deleteAccount = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       // Mock API call - replace with actual endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // In real app, this would redirect to login or home
-      console.log("Account deleted successfully")
-      return true
+      console.log("Account deleted successfully");
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete account")
-      return false
+      setError(err instanceof Error ? err.message : "Failed to delete account");
+      return false;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   return {
     profile,
@@ -67,5 +73,5 @@ export function useProfileCrud() {
     error,
     updateProfile,
     deleteAccount,
-  }
+  };
 }

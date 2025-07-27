@@ -1,18 +1,30 @@
 "use client"
 
-import { useState } from "react"
-import { User, Edit3, Save, X, Trash2, Camera, Heart, Mail, Calendar } from "lucide-react"
-import { useProfileCrud } from "../../../hooks/useProfile"
+import defaultAvatar from "../../../assets/alen.jpeg"
+import { useState, useEffect } from "react"
+import { User, Edit3, Save, X, Trash2, Camera, Heart, Mail, Calendar, Loader2 } from 'lucide-react'
+import { useProfile } from "../../../hooks/useProfile"
 
 export default function ProfileDesktop() {
-  const { profile, loading, error, updateProfile, deleteAccount } = useProfileCrud()
+  const { profile, loading, error, updateProfile, deleteAccount } = useProfile()
   const [isEditing, setIsEditing] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [editForm, setEditForm] = useState({
-    name: profile.name,
-    email: profile.email,
-    bio: profile.bio,
+    name: "",
+    username: "",
+    bio: "",
   })
+
+  // Update editForm when profile is loaded
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        name: profile.name || "",
+        username: profile.username || "",
+        bio: profile.bio || "",
+      })
+    }
+  }, [profile])
 
   const handleSave = async () => {
     const success = await updateProfile(editForm)
@@ -22,11 +34,13 @@ export default function ProfileDesktop() {
   }
 
   const handleCancel = () => {
-    setEditForm({
-      name: profile.name,
-      email: profile.email,
-      bio: profile.bio,
-    })
+    if (profile) {
+      setEditForm({
+        name: profile.name || "",
+        username: profile.username || "",
+        bio: profile.bio || "",
+      })
+    }
     setIsEditing(false)
   }
 
@@ -36,6 +50,49 @@ export default function ProfileDesktop() {
       setShowDeleteConfirm(false)
       // Redirect logic here
     }
+  }
+
+  // Loading state
+  if (loading && !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-pink-500 animate-spin mx-auto mb-4" />
+          <p className="text-pink-600 text-lg font-medium">Loading your beautiful profile... 💕</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error && !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <Heart className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Oops! Something went wrong</h2>
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Profile not found
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <User className="w-16 h-16 text-pink-400 mx-auto mb-4" />
+          <p className="text-pink-600 text-lg">Profile not found</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -52,7 +109,11 @@ export default function ProfileDesktop() {
         </div>
 
         {/* Error Message */}
-        {error && <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl mb-6">{error}</div>}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl mb-6">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Avatar & Basic Info */}
@@ -60,7 +121,7 @@ export default function ProfileDesktop() {
             <div className="bg-white rounded-2xl shadow-lg p-6 text-center sticky top-8">
               <div className="relative inline-block mb-6">
                 <img
-                  src={profile.avatar || "/placeholder.svg"}
+                  src={profile.avatar || defaultAvatar}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover border-4 border-pink-200 shadow-lg"
                 />
@@ -70,18 +131,18 @@ export default function ProfileDesktop() {
               </div>
 
               <h2 className="text-2xl font-bold text-pink-800 mb-2">{profile.name}</h2>
-              <p className="text-pink-600 mb-6">{profile.bio}</p>
+              <p className="text-pink-600 mb-6">{profile.bio || "No bio yet"}</p>
 
               <div className="space-y-3 text-left">
                 <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
                   <Mail className="w-5 h-5 text-pink-500" />
-                  <span className="text-pink-800 text-sm">{profile.email}</span>
+                  <span className="text-pink-800 text-sm">{profile.username}</span>
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
                   <Calendar className="w-5 h-5 text-pink-500" />
                   <span className="text-pink-800 text-sm">
-                    Joined {new Date(profile.joinDate).toLocaleDateString()}
+                    Joined {new Date(profile.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -117,13 +178,13 @@ export default function ProfileDesktop() {
                   </div>
 
                   <div>
-                    <label className="block text-pink-800 font-medium mb-2">Email</label>
-                    <div className="p-4 bg-pink-50 rounded-xl text-pink-800">{profile.email}</div>
+                    <label className="block text-pink-800 font-medium mb-2">Username</label>
+                    <div className="p-4 bg-pink-50 rounded-xl text-pink-800">{profile.username}</div>
                   </div>
 
                   <div className="md:col-span-2">
                     <label className="block text-pink-800 font-medium mb-2">Bio</label>
-                    <div className="p-4 bg-pink-50 rounded-xl text-pink-800">{profile.bio}</div>
+                    <div className="p-4 bg-pink-50 rounded-xl text-pink-800">{profile.bio || "No bio yet"}</div>
                   </div>
                 </div>
               ) : (
@@ -140,11 +201,11 @@ export default function ProfileDesktop() {
                     </div>
 
                     <div>
-                      <label className="block text-pink-800 font-medium mb-2">Email</label>
+                      <label className="block text-pink-800 font-medium mb-2">Username</label>
                       <input
-                        type="email"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        type="text"
+                        value={editForm.username}
+                        onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                         className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800"
                       />
                     </div>
@@ -157,6 +218,7 @@ export default function ProfileDesktop() {
                       onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                       className="w-full p-4 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 text-pink-800 resize-none"
                       rows={4}
+                      placeholder="Tell us about yourself..."
                     />
                   </div>
 
@@ -166,13 +228,14 @@ export default function ProfileDesktop() {
                       disabled={loading}
                       className="bg-gradient-to-r from-pink-400 to-pink-500 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center gap-2"
                     >
-                      <Save className="w-4 h-4" />
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       {loading ? "Saving..." : "Save Changes"}
                     </button>
 
                     <button
                       onClick={handleCancel}
-                      className="bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors flex items-center gap-2"
+                      disabled={loading}
+                      className="bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors flex items-center gap-2 disabled:opacity-50"
                     >
                       <X className="w-4 h-4" />
                       Cancel
@@ -215,13 +278,15 @@ export default function ProfileDesktop() {
                     <button
                       onClick={handleDelete}
                       disabled={loading}
-                      className="bg-red-500 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50"
+                      className="bg-red-500 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50 flex items-center gap-2"
                     >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                       {loading ? "Deleting..." : "Yes, Delete My Account"}
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                      disabled={loading}
+                      className="bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-medium hover:bg-gray-300 transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>

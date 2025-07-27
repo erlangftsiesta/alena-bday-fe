@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../constant";
 
 export interface LoginCredentials {
   username: string;
@@ -15,7 +16,6 @@ export interface User {
   username: string;
   avatar: string;
 }
-const API_URL = import.meta.env.API_URL;
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -27,7 +27,7 @@ export function useAuth() {
   const fetchUser = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/me`, { withCredentials: true });
+      const res = await axios.get(`${API_URL}/auth/me`, { withCredentials: true });
       setUser(res.data);
       setIsAuthenticated(true);
     } catch {
@@ -48,7 +48,7 @@ export function useAuth() {
       setError(null);
 
       try {
-        const res = await axios.post(`${API_URL}/login`, credentials, {
+        const res = await axios.post(`${API_URL}/auth/login`, credentials, {
           withCredentials: true,
         });
         console.log("Login response:", res.data);
@@ -67,7 +67,7 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
-    await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
+    await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true });
     setUser(null);
     setIsAuthenticated(false);
     navigate("/send-message");

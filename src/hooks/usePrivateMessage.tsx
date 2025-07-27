@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { API_URL } from "../constant";
 
 export interface PrivateMessage {
   id: string;
@@ -78,7 +79,7 @@ export function usePrivateMessages() {
 
     try {
       const response = await axios.get<PrivateMessage[]>(
-        "http://localhost:3000/messages/private-messages"
+        `${API_URL}/messages/private-messages`
       );
       setMessages(response.data);
     } catch (err) {

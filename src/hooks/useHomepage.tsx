@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { API_URL } from "../constant";
 
 export interface Message {
   id: string;
@@ -12,8 +13,8 @@ export interface Message {
   songMp3?: string;
   sender: string;
   date: string;
-  isPublic: boolean;
-  isNew: boolean; // New field for unread messages
+  isPublic: boolean | number;
+  isNew: boolean | number; // New field for unread messages
 }
 
 export interface AudioState {
@@ -100,7 +101,7 @@ export function useHomepage() {
     setError(null);
 
     try {
-      const res = await axios.get<Message[]>(`http://localhost:3000/messages`);
+      const res = await axios.get<Message[]>(`${API_URL}/messages`);
 
       const data = res.data;
 
@@ -109,7 +110,7 @@ export function useHomepage() {
       );
 
       const newMessagesCount = data.filter((m) => m.isNew).length;
-      const privateMessagesCount = data.filter((m) => !m.isPublic).length;
+      // const privateMessagesCount = data.filter((m) => !m.isPublic).length;
 
       setMessages(sorted);
       setNotification({
@@ -147,12 +148,9 @@ export function useHomepage() {
     async (messageId: string, makePublic: boolean) => {
       setLoading(true);
       try {
-        await axios.patch(
-          `http://localhost:3000/messages/${messageId}/privacy-update`,
-          {
-            isPublic: makePublic,
-          }
-        );
+        await axios.patch(`${API_URL}/messages/${messageId}/privacy-update`, {
+          isPublic: makePublic,
+        });
 
         setMessages((prev) => {
           const updated = prev.map((msg) =>
@@ -260,8 +258,15 @@ export function useHomepage() {
 
   const markMessageAsRead = useCallback(async (messageId: string) => {
     try {
-      // Mock API call to mark as read
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Correct axios usage
+      const response = await axios.patch(
+        `${API_URL}/messages/${messageId}/mark-read`
+      );
+
+      // Axios does not use .ok — check response.status instead
+      if (response.status !== 200) {
+        throw new Error("Failed to mark message as read");
+      }
 
       setMessages((prev) =>
         prev.map((msg) =>
@@ -269,7 +274,6 @@ export function useHomepage() {
         )
       );
 
-      // Update notification count
       setNotification((prev) => ({
         ...prev,
         newMessages: Math.max(0, prev.newMessages - 1),
@@ -282,12 +286,14 @@ export function useHomepage() {
     }
   }, []);
 
-  // Mark all messages as read
   const markAllAsRead = useCallback(async () => {
     setLoading(true);
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await axios.patch(`${API_URL}/messages/mark-all-read`);
+
+      if (response.status !== 200) {
+        throw new Error("Failed to mark all messages as read");
+      }
 
       setMessages((prev) => prev.map((msg) => ({ ...msg, isNew: false })));
       setNotification((prev) => ({ ...prev, newMessages: 0 }));

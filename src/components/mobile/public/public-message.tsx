@@ -136,7 +136,6 @@ export default function PublicMessagesMobile() {
         <div className="text-center py-12">
           <Music className="w-16 h-16 text-pink-300 mx-auto mb-4" />
           <p className="text-pink-600 text-lg font-medium">No public messages yet</p>
-          <p className="text-pink-500 text-sm">Be the first to share your love! 💕</p>
         </div>
       )}
 
