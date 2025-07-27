@@ -225,7 +225,7 @@ export default function LoginMobile() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-pink-500 text-sm">
-            Made with 💕 for spreading love through music
+            Made with 💕from your favourite boy
           </p>
         </div>
       </div>
