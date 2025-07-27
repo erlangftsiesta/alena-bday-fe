@@ -4,8 +4,6 @@ import type React from "react";
 
 import { Heart, Play, Pause, Music, X, Sparkles, Globe } from "lucide-react";
 import { usePublicMessages } from "../../../hooks/usePublicMessage";
-import { useAuth } from "../../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 
 export default function PublicMessagesMobile() {
   const {
