@@ -1,14 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Search, Play, Pause, Music, Send, Heart } from "lucide-react"
-import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic"
+import { useState } from "react";
+import {
+  Search,
+  Play,
+  Pause,
+  Music,
+  Send,
+  Heart,
+  Home,
+  User,
+} from "lucide-react";
+import { useMusicSearch, type Song } from "../../../hooks/useSearchMusic";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 
 export default function SendMessageMobile() {
-  const [searchQuery, setSearchQuery] = useState("beautiful in white")
-  const [showMessageForm, setShowMessageForm] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showMessageForm, setShowMessageForm] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const {
     songs,
@@ -27,41 +39,85 @@ export default function SendMessageMobile() {
     setMessage,
     setSender,
     sendMessage,
-  } = useMusicSearch()
+  } = useMusicSearch();
 
   const handleSearch = () => {
-    searchSongs(searchQuery)
-  }
+    searchSongs(searchQuery);
+  };
 
   const handleSongSelect = (song: Song) => {
-    setSelectedSong(song)
-    setShowMessageForm(true)
-  }
+    setSelectedSong(song);
+    setShowMessageForm(true);
+  };
 
   const handleSendMessage = async () => {
-    if (!selectedSong) return
+    if (!selectedSong) return;
 
     const success = await sendMessage({
       song: selectedSong,
       message,
       sender: sender || "Anonymous",
-    })
+    });
 
     if (success) {
-      setShowMessageForm(false)
+      setShowMessageForm(false);
       // Show success message or redirect
     }
-  }
+  };
 
-  const handleProgressClick = (song: Song, event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const clickX = event.clientX - rect.left
-    const percentage = (clickX / rect.width) * 100
-    setProgressManually(song, percentage)
-  }
+  const handleProgressClick = (
+    song: Song,
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    setProgressManually(song, percentage);
+  };
+
+  useAuth(); // Add isAuthenticated and user
+  const navigate = useNavigate(); // Add this
+
+  const handleUserIconClick = () => {
+    if (isAuthenticated) {
+      navigate("/homepage"); // Navigate to homepage if authenticated
+    } else {
+      navigate("/login"); // Navigate to homepage if authenticated
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 p-4">
+      {/* User Icon - Top Right */}
+      <div className="absolute top-6 right-6 z-10">
+        <button
+          onClick={handleUserIconClick}
+          className="bg-white/90 backdrop-blur-sm text-pink-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-pink-200"
+          title={
+            isAuthenticated
+              ? `Go to Homepage (${user?.name || "User"})`
+              : "Login"
+          }
+        >
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+          ) : isAuthenticated ? (
+            <Home className="w-6 h-6 text-pink-600" />
+          ) : (
+            <User className="w-6 h-6 text-pink-600" />
+          )}
+        </button>
+
+        {/* User Info Tooltip - Show when authenticated */}
+        {isAuthenticated && user && (
+          <div className="absolute top-14 right-0 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-pink-200 min-w-[120px] animate-fade-in">
+            <p className="text-pink-800 font-semibold text-sm truncate">
+              Hi, {user.name}! 👋
+            </p>
+            <p className="text-pink-600 text-xs">Tap to go home</p>
+          </div>
+        )}
+      </div>
       {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
@@ -69,7 +125,9 @@ export default function SendMessageMobile() {
           <h1 className="text-2xl font-bold text-pink-800">Send a Song</h1>
           <Heart className="w-6 h-6 text-pink-500" />
         </div>
-        <p className="text-pink-600 text-sm">Share your feelings through music</p>
+        <p className="text-pink-600 text-sm">
+          Share your feelings through music
+        </p>
       </div>
 
       {!showMessageForm ? (
@@ -100,13 +158,15 @@ export default function SendMessageMobile() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4">{error}</div>
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4">
+              {error}
+            </div>
           )}
 
           {/* Song Results */}
           <div className="space-y-4">
             {songs.map((song) => {
-              const isPlaying = currentlyPlaying === song.id
+              const isPlaying = currentlyPlaying === song.id;
               return (
                 <div
                   key={song.id}
@@ -117,10 +177,16 @@ export default function SendMessageMobile() {
                     <button
                       onClick={() => togglePlay(song)}
                       className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
-                        isPlaying ? "bg-pink-500 text-white" : "bg-white text-pink-500 hover:bg-pink-50"
+                        isPlaying
+                          ? "bg-pink-500 text-white"
+                          : "bg-white text-pink-500 hover:bg-pink-50"
                       }`}
                     >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                      {isPlaying ? (
+                        <Pause className="w-4 h-4" />
+                      ) : (
+                        <Play className="w-4 h-4 ml-0.5" />
+                      )}
                     </button>
                   )}
 
@@ -132,8 +198,12 @@ export default function SendMessageMobile() {
                     />
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-pink-800 text-lg truncate">{song.title}</h3>
-                      <p className="text-pink-600 text-sm truncate mb-2">{song.artist}</p>
+                      <h3 className="font-bold text-pink-800 text-lg truncate">
+                        {song.title}
+                      </h3>
+                      <p className="text-pink-600 text-sm truncate mb-2">
+                        {song.artist}
+                      </p>
 
                       {/* Progress Bar - Only show when playing */}
                       {isPlaying && (
@@ -153,7 +223,11 @@ export default function SendMessageMobile() {
                         </div>
                       )}
 
-                      {!song.previewUrl && <div className="text-pink-400 text-xs">No preview available</div>}
+                      {!song.previewUrl && (
+                        <div className="text-pink-400 text-xs">
+                          No preview available
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -167,14 +241,18 @@ export default function SendMessageMobile() {
                     </button>
                   </div>
                 </div>
-              )
+              );
             })}
 
             {songs.length === 0 && !loading && (
               <div className="text-center py-12 bg-white rounded-2xl shadow-lg">
                 <Music className="w-16 h-16 text-pink-300 mx-auto mb-4" />
-                <p className="text-pink-600 text-lg font-medium">No songs found</p>
-                <p className="text-pink-500 text-sm">Try searching for another song</p>
+                <p className="text-pink-600 text-lg font-medium">
+                  No songs found
+                </p>
+                <p className="text-pink-500 text-sm">
+                  Try searching for another song
+                </p>
               </div>
             )}
           </div>
@@ -217,8 +295,12 @@ export default function SendMessageMobile() {
                   className="w-12 h-12 rounded-lg object-cover"
                 />
                 <div className="flex-1">
-                  <h3 className="font-bold text-pink-800">{selectedSong.title}</h3>
-                  <p className="text-pink-600 text-sm mb-2">{selectedSong.artist}</p>
+                  <h3 className="font-bold text-pink-800">
+                    {selectedSong.title}
+                  </h3>
+                  <p className="text-pink-600 text-sm mb-2">
+                    {selectedSong.artist}
+                  </p>
 
                   {/* Progress Bar - Only show when playing */}
                   {currentlyPlaying === selectedSong.id && (
@@ -229,7 +311,9 @@ export default function SendMessageMobile() {
                       >
                         <div
                           className="bg-pink-500 h-full rounded-full transition-all duration-100"
-                          style={{ width: `${progress[selectedSong.id] || 0}%` }}
+                          style={{
+                            width: `${progress[selectedSong.id] || 0}%`,
+                          }}
                         />
                       </div>
                       <span className="text-xs text-pink-600 min-w-[35px]">
@@ -244,7 +328,9 @@ export default function SendMessageMobile() {
 
           {/* Message Input */}
           <div className="mb-4">
-            <label className="block text-pink-800 font-medium mb-2">Your Message</label>
+            <label className="block text-pink-800 font-medium mb-2">
+              Your Message
+            </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -256,7 +342,9 @@ export default function SendMessageMobile() {
 
           {/* Sender Input */}
           <div className="mb-6">
-            <label className="block text-pink-800 font-medium mb-2">From (optional)</label>
+            <label className="block text-pink-800 font-medium mb-2">
+              From (optional)
+            </label>
             <input
               type="text"
               value={sender}
@@ -278,5 +366,5 @@ export default function SendMessageMobile() {
         </div>
       )}
     </div>
-  )
+  );
 }
